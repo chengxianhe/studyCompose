@@ -1,5 +1,6 @@
 plugins {
     id("studycompose.android.library")
+    id("studycompose.hilt")
 }
 
 android {

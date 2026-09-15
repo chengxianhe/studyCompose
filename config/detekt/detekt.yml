@@ -1,0 +1,43 @@
+build:
+  maxIssues: 0
+
+complexity:
+  LargeClass:
+    active: true
+    threshold: 250
+  LongMethod:
+    active: true
+    threshold: 40
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 12
+    thresholdInClasses: 12
+    thresholdInInterfaces: 12
+    thresholdInObjects: 12
+    thresholdInEnums: 12
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 6
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 12
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers: ['-1', '0', '1', '2']
+    ignoreAnnotated: ['Preview', 'Composable']
+    # :core:designsystem 是视觉常量唯一真相源，豁免（呼应 Konsist 设计系统规则的 scope 限定）
+    excludes: ['**/core/designsystem/**']
+  ForbiddenImport:
+    active: true
+    imports:
+      - value: 'androidx.compose.material.*'
+        reason: '本项目统一使用 Material3，禁止导入 Compose Material2'
+
+naming:
+  FunctionNaming:
+    active: true
+    # Compose 约定 Composable 函数名大写开头，和 detekt 默认的函数命名规则天然冲突
+    ignoreAnnotated: ['Composable']
