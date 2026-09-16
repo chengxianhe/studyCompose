@@ -2,6 +2,7 @@ plugins {
     id("studycompose.android.application")
     id("studycompose.android.application.compose")
     id("studycompose.hilt")
+    id("studycompose.android.lint")
 }
 
 android {

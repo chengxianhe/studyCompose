@@ -2,6 +2,7 @@ plugins {
     id("studycompose.android.library")
     id("studycompose.hilt")
     id("studycompose.android.room")
+    id("studycompose.android.lint")
     alias(libs.plugins.kotlin.serialization)
 }
 
