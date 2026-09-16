@@ -11,11 +11,13 @@ import org.junit.Test
  * :core:designsystem 本身就是定义这些值的地方，天然豁免。
  */
 class DesignSystemTest {
-
-    private val scopedFiles = Konsist.scopeFromProject().files
-        .filter { it.path.contains("/feature/") || it.path.contains("/data/") }
-        .filterNot { it.name.endsWith("Preview.kt") }
-        .filterNot { it.path.contains("/test/") || it.path.contains("/androidTest/") }
+    private val scopedFiles =
+        Konsist
+            .scopeFromProject()
+            .files
+            .filter { it.path.contains("/feature/") || it.path.contains("/data/") }
+            .filterNot { it.name.endsWith("Preview.kt") }
+            .filterNot { it.path.contains("/test/") || it.path.contains("/androidTest/") }
 
     @Test
     fun `feature data 模块禁止硬编码颜色`() {
@@ -28,13 +30,16 @@ class DesignSystemTest {
 
     @Test
     fun `feature data 模块禁止内联 dp 数值`() {
-        val violations = scopedFiles.mapNotNull { file ->
-            val matches = Regex("""(?<![\w.])(\d+)\.dp""").findAll(file.text)
-                .map { it.groupValues[1].toInt() }
-                .filter { it != 0 && it != 1 }
-                .toList()
-            if (matches.isNotEmpty()) file.path to matches else null
-        }
+        val violations =
+            scopedFiles.mapNotNull { file ->
+                val matches =
+                    Regex("""(?<![\w.])(\d+)\.dp""")
+                        .findAll(file.text)
+                        .map { it.groupValues[1].toInt() }
+                        .filter { it != 0 && it != 1 }
+                        .toList()
+                if (matches.isNotEmpty()) file.path to matches else null
+            }
         assertTrue("以下文件存在内联 dp: $violations", violations.isEmpty())
     }
 
@@ -58,11 +63,12 @@ class DesignSystemTest {
 
     @Test
     fun `feature data 模块禁止直接引用设计系统基础色`() {
-        val violations = scopedFiles.filter { file ->
-            file.imports.any {
-                it.name.contains("designsystem.theme.Blue") || it.name.contains("designsystem.theme.Neutral")
+        val violations =
+            scopedFiles.filter { file ->
+                file.imports.any {
+                    it.name.contains("designsystem.theme.Blue") || it.name.contains("designsystem.theme.Neutral")
+                }
             }
-        }
         assertTrue(
             "以下文件直接引用了基础色，只能用语义层（MaterialTheme.colorScheme）: ${violations.map { it.path }}",
             violations.isEmpty(),

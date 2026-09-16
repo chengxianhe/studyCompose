@@ -22,33 +22,35 @@ internal val Green500 = Color(0xFF2E7D32)
 internal val Amber500 = Color(0xFFF9A825)
 
 // ② 语义层 —— Material3 colorScheme，业务代码只能通过 MaterialTheme.colorScheme 使用
-internal val LightColors = lightColorScheme(
-    primary = Blue500,
-    onPrimary = Neutral0,
-    primaryContainer = Blue50,
-    onPrimaryContainer = Blue900,
-    surface = Neutral0,
-    onSurface = Neutral900,
-    surfaceVariant = Neutral50,
-    onSurfaceVariant = Neutral500,
-    outline = Neutral200,
-    error = Red500,
-    onError = Neutral0,
-)
+internal val LightColors =
+    lightColorScheme(
+        primary = Blue500,
+        onPrimary = Neutral0,
+        primaryContainer = Blue50,
+        onPrimaryContainer = Blue900,
+        surface = Neutral0,
+        onSurface = Neutral900,
+        surfaceVariant = Neutral50,
+        onSurfaceVariant = Neutral500,
+        outline = Neutral200,
+        error = Red500,
+        onError = Neutral0,
+    )
 
-internal val DarkColors = darkColorScheme(
-    primary = Blue50,
-    onPrimary = Blue900,
-    primaryContainer = Blue900,
-    onPrimaryContainer = Blue50,
-    surface = Neutral900,
-    onSurface = Neutral0,
-    surfaceVariant = Neutral800,
-    onSurfaceVariant = Neutral200,
-    outline = Neutral500,
-    error = Red500,
-    onError = Neutral900,
-)
+internal val DarkColors =
+    darkColorScheme(
+        primary = Blue50,
+        onPrimary = Blue900,
+        primaryContainer = Blue900,
+        onPrimaryContainer = Blue50,
+        surface = Neutral900,
+        onSurface = Neutral0,
+        surfaceVariant = Neutral800,
+        onSurfaceVariant = Neutral200,
+        outline = Neutral500,
+        error = Red500,
+        onError = Neutral900,
+    )
 
 @Immutable
 data class ExtendedColors(
@@ -58,18 +60,20 @@ data class ExtendedColors(
     val onWarning: Color,
 )
 
-internal val LightExtendedColors = ExtendedColors(
-    success = Green500,
-    onSuccess = Neutral0,
-    warning = Amber500,
-    onWarning = Neutral900,
-)
+internal val LightExtendedColors =
+    ExtendedColors(
+        success = Green500,
+        onSuccess = Neutral0,
+        warning = Amber500,
+        onWarning = Neutral900,
+    )
 
-internal val DarkExtendedColors = ExtendedColors(
-    success = Green500,
-    onSuccess = Neutral900,
-    warning = Amber500,
-    onWarning = Neutral900,
-)
+internal val DarkExtendedColors =
+    ExtendedColors(
+        success = Green500,
+        onSuccess = Neutral900,
+        warning = Amber500,
+        onWarning = Neutral900,
+    )
 
 val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }

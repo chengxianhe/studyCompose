@@ -1,0 +1,38 @@
+name: CI
+on: [pull_request, push]
+
+jobs:
+  hard: # hard-mandatory：失败即阻断，不可绕过
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew assembleDebug
+      - run: ./gradlew test
+      - run: ./gradlew :konsistTest:test
+      - run: ./gradlew lint
+
+  soft: # soft-mandatory：失败标记但不阻断合并
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew detekt spotlessCheck
+      - run: ./gradlew dependencyGuard
+
+  advisory: # advisory：只报告
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew jacocoTestReport
+      - name: APK 体积
+        run: ./gradlew assembleRelease && ls -lh app/build/outputs/apk/release/

@@ -3,6 +3,7 @@ plugins {
     id("studycompose.android.application.compose")
     id("studycompose.hilt")
     id("studycompose.android.lint")
+    alias(libs.plugins.dependency.guard)
 }
 
 android {
@@ -21,7 +22,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -43,4 +44,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+dependencyGuard {
+    configuration("releaseRuntimeClasspath")
 }

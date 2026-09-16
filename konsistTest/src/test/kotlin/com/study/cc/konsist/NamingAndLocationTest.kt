@@ -6,10 +6,10 @@ import org.junit.Test
 
 /** 命名与位置规则（规则6-10）。目前业务代码还是空骨架，多数断言在空集合上恒真，等真实类出现才生效。 */
 class NamingAndLocationTest {
-
     @Test
     fun `继承 ViewModel 的类必须以 ViewModel 结尾`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .classes()
             .filter { it.hasParentWithName("ViewModel") }
             .assertTrue { it.hasNameEndingWith("ViewModel") }
@@ -17,7 +17,8 @@ class NamingAndLocationTest {
 
     @Test
     fun `UseCase 后缀的类必须在 usecase 包下且只有一个 public 方法`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .classes()
             .filter { it.hasNameEndingWith("UseCase") }
             .assertTrue { useCase ->
@@ -28,7 +29,8 @@ class NamingAndLocationTest {
 
     @Test
     fun `Repository 接口必须在 domain repository 包下`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .interfaces()
             .filter { it.hasNameEndingWith("Repository") }
             .assertTrue { it.resideInPackage("..domain.repository..") }
@@ -36,7 +38,8 @@ class NamingAndLocationTest {
 
     @Test
     fun `Repository 实现必须在 data repository 包下且以 Impl 结尾`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .classes()
             .filter { it.hasParentWithName("Repository") }
             .assertTrue { it.hasNameEndingWith("RepositoryImpl") && it.resideInPackage("..data.repository..") }
@@ -44,7 +47,8 @@ class NamingAndLocationTest {
 
     @Test
     fun `Dto 后缀的类必须在 data 包下`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .classes()
             .filter { it.hasNameEndingWith("Dto") }
             .assertTrue { it.resideInPackage("..data..") }
@@ -52,7 +56,8 @@ class NamingAndLocationTest {
 
     @Test
     fun `Composable 函数名必须大写开头`() {
-        Konsist.scopeFromProject()
+        Konsist
+            .scopeFromProject()
             .functions()
             .filter { it.hasAnnotationWithName("Composable") }
             .assertTrue { it.name.firstOrNull()?.isUpperCase() == true }
