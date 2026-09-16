@@ -35,7 +35,16 @@ Google 官方架构指南分层（UI / Domain / Data）+ 单向数据流（UDF�
 ## 开工前必读
 实现新功能前，先读 `docs/patterns/README.md` 找对应场景，
 按索引打开它指向的真实代码，照那个结构写。
-找不到对应样板时告诉我，一起定一个新的（不要假装样板存在）。
+
+`docs/patterns/README.md` 里标"待补"的场景（项目内还没有真实代码可参照时）：
+去查 Google 官方的 Now in Android（github.com/android/nowinandroid）对应写法作为外部参照——
+它是 Compose + 多模块 + Hilt + offline-first 这套架构的官方样板项目，本项目的 build-logic
+约定插件设计就是照它的思路搭的。参照它写完之后，把这份代码补进 `docs/patterns/README.md`
+对应行，之后同类场景直接用项目内部这份，不用每次都去查外部项目。
+
+Now in Android 是通用参考，不代表和本项目业务场景100%贴合，明显不适用的地方停下来问，
+不要照抄了事。找不到合适参照（项目内和 NiA 都没有）时告诉我，一起定一个新的
+（不要假装样板存在）。
 
 ## 设计系统（硬约束）
 视觉常量唯一来源是 `:core:designsystem`（`com.study.cc.core.designsystem.theme` 下的
