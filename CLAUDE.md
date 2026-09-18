@@ -46,6 +46,18 @@ Now in Android 是通用参考，不代表和本项目业务场景100%贴合，�
 不要照抄了事。找不到合适参照（项目内和 NiA 都没有）时告诉我，一起定一个新的
 （不要假装样板存在）。
 
+## 知识库（govplatform，MCP 工具）
+本项目配了一个独立的知识治理原型（`platform/`，见
+`docs/ai-engineering-governed-delivery-platform-baseline.md`），通过 MCP 暴露
+`knowledge.search` / `knowledge.propose` 两个工具。
+
+- 遇到不确定的架构/业务规则、或者这条规则 `CLAUDE.md` 里没写清楚时，先用
+  `knowledge.search` 查一下有没有人已经记录过，别自己猜
+- 发现了值得记住的新规则/决策，用 `knowledge.propose` 提交一条。提交后状态是
+  "待审核"，我确认过才会生效、才能被搜到——提交完不代表马上能用，别当场假设它已生效
+- 这两个工具不在当前会话的工具列表里（没连上 MCP、或者没被信任）时，跳过这一步，
+  按现有规则（`docs/patterns/`、`docs/LESSONS.md`、问我）处理，不要因为工具不可用卡住
+
 ## 设计系统（硬约束）
 视觉常量唯一来源是 `:core:designsystem`（`com.study.cc.core.designsystem.theme` 下的
 Color / Spacing / Type / Sizes / Radius / Elevation），业务代码禁止内联任何视觉数值。

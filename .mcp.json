@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "govplatform": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "platform",
+        "python",
+        "-m",
+        "govplatform.mcp_server.server"
+      ],
+      "env": {}
+    }
+  }
+}

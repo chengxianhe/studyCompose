@@ -1,0 +1,56 @@
+name: Platform CI
+
+on:
+  push:
+    paths: ["platform/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
+  pull_request:
+    paths: ["platform/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
+
+jobs:
+  hard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+      - name: Validate .mcp.json is well-formed JSON
+        working-directory: .
+        run: python3 -c "import json; json.load(open('.mcp.json'))"
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run mypy --strict src tests
+      - run: uv run pytest
+      - name: Smoke-test the MCP server entry point imports cleanly
+        run: uv run python -c "import govplatform.mcp_server.server"
+
+  soft:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run ruff format --check .
+
+  advisory:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run pytest --cov=govplatform --cov-report=term-missing
