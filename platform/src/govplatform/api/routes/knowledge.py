@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from govplatform.identity.models import Principal, PrincipalNotAllowedError
 from govplatform.knowledge import service as knowledge_service
 from govplatform.knowledge.models import AuthorityLevel, KnowledgeType
-from govplatform.knowledge.service import ApprovalError, ProposeResponse, SensitiveContentError
+from govplatform.knowledge.service import (
+    ApprovalError,
+    InvalidTimeRangeError,
+    ProposeResponse,
+    SensitiveContentError,
+)
 from govplatform.search import service as search_service
 from govplatform.search.service import SearchResponse
 
@@ -21,6 +28,8 @@ class ProposeRequest(BaseModel):
     authority_level: AuthorityLevel
     caller: Principal
     tags: list[str] | None = None
+    effective_at: datetime | None = None
+    expire_at: datetime | None = None
 
 
 class SearchRequest(BaseModel):
@@ -45,10 +54,14 @@ def propose_knowledge(request: ProposeRequest) -> ProposeResponse:
             authority_level=request.authority_level,
             caller=request.caller,
             tags=request.tags,
+            effective_at=request.effective_at,
+            expire_at=request.expire_at,
         )
     except PrincipalNotAllowedError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except SensitiveContentError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except InvalidTimeRangeError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return ProposeResponse(knowledge_id=obj.knowledge_id, status=obj.status, version=obj.version)
 

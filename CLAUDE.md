@@ -111,8 +111,12 @@ Color / Spacing / Type / Sizes / Radius / Elevation），业务代码禁止内�
 - 不顺手重构无关代码，不顺手加没要求的功能
 - 不确定的设计决策停下来问，不要自己拍板
 
-## 交叉审查（配了 codex MCP 后启用，目前尚未配置，先占位）
-任务完成且本地全绿后，调用 codex 审查，传入：本次 git diff、
-本文件的架构与设计系统章节、`TASKS.md` 中该任务的验收标准。
-要求它只输出分级问题清单，不改文件。
-收到后逐条评估：认同的修复，不认同的说明理由交我判断。
+## 交叉审查（Codex，已启用）
+Codex 已经通过官方 CLI 装好，能连上本仓库和 `platform/` 的 MCP 工具
+（`knowledge.search` 等）。实际流程：Claude Code 完成任务、本地自检
+（`./gradlew :konsistTest:test detekt lint test` 或 `platform/` 下的
+`mypy/ruff/pytest`）全绿后如实报告结果；由用户在 Codex 那边跑审查，把
+结果贴回来。Claude Code 收到后逐条核实（不能光凭 review 说什么就信，
+去看代码/行号对不对）再评估：认同的直接修复，不认同的说明理由交用户
+判断。Claude Code 目前没有能直接调用 Codex 的工具，这一步还是靠用户
+手动搬运——以后如果有了直接调用的能力，这条再更新。

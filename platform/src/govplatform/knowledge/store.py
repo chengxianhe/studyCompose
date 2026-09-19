@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime
+from typing import NamedTuple
 
 from govplatform.identity.models import Agent, Human, Principal
 from govplatform.knowledge.models import (
@@ -13,14 +14,20 @@ from govplatform.knowledge.models import (
 )
 
 
-def insert(conn: sqlite3.Connection, obj: KnowledgeObject) -> None:
+class StoredEmbedding(NamedTuple):
+    vector: bytes | None
+    model: str | None
+
+
+def insert(conn: sqlite3.Connection, obj: KnowledgeObject, embedding: StoredEmbedding) -> None:
     conn.execute(
         """
         INSERT INTO knowledge_objects (
             knowledge_id, title, type, body, source, author_json, owner,
             authority_level, status, version, effective_at, expire_at,
-            tags_json, content_hash, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            tags_json, content_hash, created_at, updated_at, embedding,
+            embedding_model
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             obj.knowledge_id,
@@ -39,6 +46,8 @@ def insert(conn: sqlite3.Connection, obj: KnowledgeObject) -> None:
             obj.content_hash,
             obj.created_at.isoformat(),
             obj.updated_at.isoformat(),
+            embedding.vector,
+            embedding.model,
         ),
     )
 
@@ -52,12 +61,17 @@ def get(conn: sqlite3.Connection, knowledge_id: str) -> KnowledgeObject | None:
     return _row_to_object(row)
 
 
-def list_by_status(conn: sqlite3.Connection, status: KnowledgeStatus) -> list[KnowledgeObject]:
+def list_by_status_with_embeddings(
+    conn: sqlite3.Connection, status: KnowledgeStatus
+) -> list[tuple[KnowledgeObject, StoredEmbedding]]:
     rows = conn.execute(
         "SELECT * FROM knowledge_objects WHERE status = ? ORDER BY created_at ASC",
         (status.value,),
     ).fetchall()
-    return [_row_to_object(row) for row in rows]
+    return [
+        (_row_to_object(row), StoredEmbedding(row["embedding"], row["embedding_model"]))
+        for row in rows
+    ]
 
 
 def update_status(

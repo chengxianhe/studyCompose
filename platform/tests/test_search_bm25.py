@@ -37,8 +37,12 @@ def test_relevant_result_ranks_above_unrelated(
 
     result = search_service.search(query="Retrofit retry backoff", caller=owner_human)
 
+    # 混合检索不再保证完全不相关的文档被硬性过滤掉——向量那条路径只做相对
+    # 排序，不设绝对阈值（原因见 platform/README.md）。这里只断言真正相关
+    # 的结果排第一、分数明显更高，不再断言"只有一条结果"。
     assert result.results[0].knowledge_id == target_id
-    assert len(result.results) == 1
+    if len(result.results) > 1:
+        assert result.results[0].score > result.results[1].score
 
 
 def test_search_ignores_in_review_objects(claude_code_agent: Agent, owner_human: Human) -> None:
