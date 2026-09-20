@@ -143,9 +143,11 @@ def test_agent_cannot_self_pass_manual_evidence_ac(
             AcceptanceResult(ac_id="AC-1", passed=True, evidence_summary="我（Agent）觉得过了")
         ],
     )
-    # Agent 自称的"通过"不算数，AC-1 仍然是未解决状态，进入修复轮次，不是 PASSED。
-    assert result.status == HarnessStatus.REPAIRING
-    assert result.repair_round == 1
+    # Agent 自称的"通过"不算数，AC-1 仍然是未解决状态——但代码本身没问题
+    # （没有真正需要重新开发的失败），不该消耗修复轮次，停在 WAITING_FOR_
+    # HUMAN 等人亲自确认或者批豁免，不是 REPAIRING。
+    assert result.status == HarnessStatus.WAITING_FOR_HUMAN
+    assert result.repair_round == 0
 
 
 def test_human_can_confirm_manual_evidence_ac(claude_code_agent: Agent, owner_human: Human) -> None:
@@ -154,6 +156,78 @@ def test_human_can_confirm_manual_evidence_ac(claude_code_agent: Agent, owner_hu
     harness_service.record_entry_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
+
+    result = harness_service.record_acceptance(
+        run_id=run.run_id,
+        caller=owner_human,
+        results=[
+            AcceptanceResult(ac_id="AC-1", passed=True, evidence_summary="我亲自看过了，没问题")
+        ],
+    )
+    assert result.status == HarnessStatus.PASSED
+
+
+def test_record_acceptance_rejects_unknown_ac_id(
+    claude_code_agent: Agent, owner_human: Human
+) -> None:
+    contract_id = _frozen_contract(claude_code_agent, owner_human)
+    run = harness_service.start(contract_id=contract_id, caller=owner_human)
+    harness_service.record_entry_gate(
+        run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
+    )
+    with pytest.raises(HarnessStateError):
+        harness_service.record_acceptance(
+            run_id=run.run_id,
+            caller=claude_code_agent,
+            results=[
+                AcceptanceResult(ac_id="AC-1", passed=True, evidence_summary="ok"),
+                AcceptanceResult(ac_id="AC-99", passed=True, evidence_summary="契约里根本没有这条"),
+            ],
+        )
+
+
+def test_record_acceptance_rejects_duplicate_ac_id_in_one_batch(
+    claude_code_agent: Agent, owner_human: Human
+) -> None:
+    """同一条 AC 在一批结果里既报失败又报通过，是自相矛盾的证据——之前
+    用集合算通过项，只要有一条 passed=True 就会把整条 AC 算作通过，
+    忽略了同批里还有一条报 passed=False，悄悄取了对自己有利的那个结论。
+    """
+    contract_id = _frozen_contract(claude_code_agent, owner_human)
+    run = harness_service.start(contract_id=contract_id, caller=owner_human)
+    harness_service.record_entry_gate(
+        run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
+    )
+    with pytest.raises(HarnessStateError):
+        harness_service.record_acceptance(
+            run_id=run.run_id,
+            caller=claude_code_agent,
+            results=[
+                AcceptanceResult(ac_id="AC-1", passed=False, evidence_summary="第一次跑失败了"),
+                AcceptanceResult(ac_id="AC-1", passed=True, evidence_summary="重跑了一下过了"),
+            ],
+        )
+
+
+def test_human_can_resolve_waiting_for_human_without_rerunning_entry_gate(
+    claude_code_agent: Agent, owner_human: Human
+) -> None:
+    """WAITING_FOR_HUMAN 是"代码没问题，就差人确认"——人推进的时候不用
+    重新过一遍入门禁，直接再调用一次 record_acceptance 就行。
+    """
+    contract_id = _frozen_contract_with_manual_evidence_ac(claude_code_agent, owner_human)
+    run = harness_service.start(contract_id=contract_id, caller=owner_human)
+    harness_service.record_entry_gate(
+        run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
+    )
+    waiting = harness_service.record_acceptance(
+        run_id=run.run_id,
+        caller=claude_code_agent,
+        results=[
+            AcceptanceResult(ac_id="AC-1", passed=True, evidence_summary="我（Agent）觉得过了")
+        ],
+    )
+    assert waiting.status == HarnessStatus.WAITING_FOR_HUMAN
 
     result = harness_service.record_acceptance(
         run_id=run.run_id,

@@ -72,7 +72,7 @@ store 层这条 SQL。
   `test_contract_sensitive_and_audit.py` 都加了对应用例，新增 6 个，
   总数从 59 到 65。
 
-## 没做的
+## 没做的（第一轮）
 
 - baseline 文档 §7 本身没改（写不进去，超行数上限），这份文件是补充
   记录，不是替代——下次有空拆分 baseline 文档时应该把 §7 整节挪出来。
@@ -80,3 +80,50 @@ store 层这条 SQL。
   也有类似的并发窗口（两个人几乎同时冻结同一份契约）——这轮只修了
   审查具体指出的 `update()` 路径，`freeze()` 是 Human-only 且概率极低，
   按"只修被指出的具体缺口"的一贯原则先不动，需要的话是独立话题。
+
+## 第二轮（同一天，紧接着第一轮修完之后）
+
+第一轮修完、又加了个 `open_questions` 非空禁止冻结的规则（业内调研
+GitHub spec-kit "[NEEDS CLARIFICATION]" 机制来的，见对话记录）之后，
+收到第二轮交叉审查，1 条 P0 + 2 条 P1，逐条核实全部属实，修完后
+70 个测试（新增 4 个）、mypy strict/ruff/pytest 全绿。
+
+**P0：manual_evidence 未解决时会进 REPAIRING，无意义消耗修复轮次。**
+第一轮修的是"Agent 不能自己把 manual_evidence 判过"，但没管"判不过之后
+去哪"——统一走跟真实失败一样的 REPAIRING 路径，代码没有任何问题也会
+被计入修复轮次，3 次之后甚至会被 ESCALATED，纯粹因为没有人去确认。
+改法：`HarnessStatus` 加一个 `WAITING_FOR_HUMAN`，`record_acceptance()`
+里把"未解决"拆成 `needs_repair_ids`（真的需要重新开发）和
+`needs_human_ids`（全是 manual_evidence，代码没问题）——只要
+`needs_repair_ids` 非空还是走 REPAIRING/ESCALATED；`needs_repair_ids`
+空但 `needs_human_ids` 非空，进 `WAITING_FOR_HUMAN`，不消耗轮次。
+`record_acceptance()` 的状态守卫也要跟着放开：从 `WAITING_FOR_HUMAN`
+能直接再调用它（人确认或者豁免生效后），不用重新过一遍入门禁。
+
+**P1：豁免的 expires_at 没校验，可能是过去的时间或者没带时区。**
+`is_ac_waived()` 拿 `expires_at` 跟 UTC 时间比较，传进来 naive datetime
+会直接抛 TypeError，不是清楚的拒绝原因；传过去的时间会造出一个一创建
+就永远无效的豁免。`request_waiver()` 加两条校验：必须带时区信息、必须
+晚于当前时间，新增 `InvalidWaiverError`。
+
+**P1：单轮验收结果里同一条 AC 出现多次、或者引用不存在的 AC，没有校验。**
+`passed_ac_ids` 之前是从 `results` 直接构建集合——同一个 `ac_id` 同一批
+里既报 `passed=False` 又报 `passed=True`，只要有一条为真就会被计入"通过"，
+悄悄取了对自己有利的结论；引用契约里没有的 `ac_id` 也不会报错，白白
+存进审计历史。加了两条前置校验：`results` 里 `ac_id` 不能重复、必须
+全部在契约的 AC 集合里，否则直接拒绝整批（`HarnessStateError`），不猜
+哪条数的。
+
+**顺带的结构性工作**：改 `harness/service.py` 时同样撞上了 250 行/文件
+上限（跟第一轮改 `contract/service.py`一样），把 `record_acceptance()`
+拆去了新文件 `harness/acceptance_service.py`，公共小工具挪进
+`harness/_shared.py`，`service.py` 变成薄的重新导出层——外部调用方
+（`api/routes/`、`mcp_server/`、测试）不用改任何 import。
+
+涉及文件：`harness/models.py`（新状态）、`harness/_shared.py`（新）、
+`harness/acceptance_service.py`（新，装 `record_acceptance()`）、
+`harness/service.py`（瘦身+重新导出）、`contract/waiver_service.py`
+（`InvalidWaiverError` + 两条校验）、`contract/service.py`（重新导出
+`InvalidWaiverError`）、`api/routes/contract.py`（新异常的 HTTP 映射）、
+测试：`test_harness_lifecycle.py`（改 1 个、加 3 个）、`test_waivers.py`
+（改 1 个、加 1 个）。

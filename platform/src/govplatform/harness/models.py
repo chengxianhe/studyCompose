@@ -10,6 +10,11 @@ class HarnessStatus(StrEnum):
     DEVELOPING = "developing"
     ACCEPTING = "accepting"
     REPAIRING = "repairing"
+    # 验收里剩下的未解决项**全部**是 manual_evidence 类型（没有任何真正
+    # 需要重新开发的失败）——不消耗修复轮次，停在这等人亲自确认或者批
+    # 豁免。跟 REPAIRING 的区别：REPAIRING 是"代码有问题，需要再开发"，
+    # 这个状态是"代码没问题，就差人看一眼"。
+    WAITING_FOR_HUMAN = "waiting_for_human"
     PASSED = "passed"
     DELIVERED = "delivered"
     ESCALATED = "escalated"

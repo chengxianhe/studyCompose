@@ -35,6 +35,7 @@ def _create(
     acceptance_criteria: list[AcceptanceCriterion] | None = None,
     test_cases: list[VerificationCase] | None = None,
     knowledge_refs: list[str] | None = None,
+    open_questions: list[str] | None = None,
 ) -> str:
     contract = contract_service.create(
         title="待校验的契约",
@@ -44,6 +45,7 @@ def _create(
         acceptance_criteria=acceptance_criteria,
         test_cases=test_cases,
         knowledge_refs=knowledge_refs,
+        open_questions=open_questions,
     )
     return contract.contract_id
 
@@ -87,6 +89,22 @@ def test_freeze_rejects_ac_with_empty_required_field(
             ),
         ],
         test_cases=[VerificationCase(tc_id="TC-1", description="用例")],
+    )
+    _assert_rejected_and_still_draft(contract_id, owner_human)
+
+
+def test_freeze_rejects_unresolved_open_questions(
+    claude_code_agent: Agent, owner_human: Human
+) -> None:
+    """抄 GitHub spec-kit 的 "[NEEDS CLARIFICATION]" 机制：带着没想清楚的
+    模糊点不能往下走。open_questions 之前只是个自由字段，没人真的检查它
+    是不是空的。
+    """
+    contract_id = _create(
+        claude_code_agent,
+        acceptance_criteria=[_valid_ac()],
+        test_cases=[VerificationCase(tc_id="TC-1", description="用例")],
+        open_questions=["收藏上限是多少还没定"],
     )
     _assert_rejected_and_still_draft(contract_id, owner_human)
 

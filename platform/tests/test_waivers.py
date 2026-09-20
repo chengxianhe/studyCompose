@@ -9,6 +9,7 @@ from govplatform.contract.models import AcceptanceCriterion, VerificationCase, V
 from govplatform.contract.service import (
     ContractStateError,
     ContractValidationError,
+    InvalidWaiverError,
     WaiverNotAllowedError,
 )
 from govplatform.harness import service as harness_service
@@ -74,6 +75,38 @@ def test_valid_waiver_lets_acceptance_pass_despite_failure(
     assert accepted.status == HarnessStatus.PASSED
 
 
+def test_expires_at_must_be_timezone_aware_and_in_the_future(
+    claude_code_agent: Agent, owner_human: Human
+) -> None:
+    """is_ac_waived() 拿 expires_at 跟 UTC 时间比较——naive datetime 传
+    进去会在比较那一刻直接抛 TypeError，已经过去的时间创建出来的豁免
+    则是个一开始就没用的死对象。两种都该在创建时就拒绝，不是留到用的
+    时候才炸或者悄悄接受一个没用的豁免。
+    """
+    contract_id = _create_contract(claude_code_agent)
+    contract_service.freeze(contract_id=contract_id, caller=owner_human)
+
+    with pytest.raises(InvalidWaiverError):
+        contract_service.request_waiver(
+            contract_id=contract_id,
+            ac_id="AC-1",
+            caller=owner_human,
+            reason="没带时区",
+            risk="风险",
+            expires_at=datetime.now(),  # noqa: DTZ005 -- 故意造一个 naive datetime
+        )
+
+    with pytest.raises(InvalidWaiverError):
+        contract_service.request_waiver(
+            contract_id=contract_id,
+            ac_id="AC-1",
+            caller=owner_human,
+            reason="已经过期",
+            risk="风险",
+            expires_at=_NOW - timedelta(days=1),
+        )
+
+
 def test_expired_waiver_does_not_cover_the_ac(claude_code_agent: Agent, owner_human: Human) -> None:
     contract_id = _create_contract(claude_code_agent)
     contract_service.freeze(contract_id=contract_id, caller=owner_human)
@@ -84,20 +117,28 @@ def test_expired_waiver_does_not_cover_the_ac(claude_code_agent: Agent, owner_hu
         caller=owner_human,
         reason="临时豁免",
         risk="风险",
-        expires_at=_NOW - timedelta(days=1),  # 已经过期
+        expires_at=_NOW + timedelta(hours=1),
     )
 
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
     harness_service.record_entry_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
+    # 验收发生在豁免过期之后（模拟"当时批的时候没过期，用的时候已经过期
+    # 了"）——is_ac_waived() 内部用真实的当前时间判断，这里直接测
+    # is_ac_waived() 本身而不是绕道 harness，跟原计划"需要能控制当前
+    # 时间，参照 test_temporal_validity.py 的手法"一致。
+    assert not contract_service.is_ac_waived(contract_id, "AC-1", now=_NOW + timedelta(days=1))
+
     accepted = harness_service.record_acceptance(
         run_id=run.run_id,
         caller=claude_code_agent,
         results=[AcceptanceResult(ac_id="AC-1", passed=False, evidence_summary="仍未通过")],
     )
-    # 过期豁免不生效，fail closed——回到"未解决"，进入修复轮次，不是 PASSED。
-    assert accepted.status == HarnessStatus.REPAIRING
+    # 这次验收发生在豁免的有效期内，所以还是会被覆盖，通过——用来对照上面
+    # "过期之后 is_ac_waived 返回 False"这个结论，两者结合起来才是完整的
+    # fail-closed 验证：有效期内覆盖，过期后不覆盖。
+    assert accepted.status == HarnessStatus.PASSED
 
 
 def test_waiver_requires_frozen_contract(claude_code_agent: Agent, owner_human: Human) -> None:

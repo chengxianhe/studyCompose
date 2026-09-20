@@ -94,3 +94,18 @@
       范围：仅 `platform/` 目录
       不做：freeze() 自身的并发窗口（概率极低、Human-only，本轮只修
       审查具体指出的缺口）
+- [x] T-P8 `platform/` 需求准入门禁调研 + 阶段3二轮交叉审查修复
+      （2026-09-20）
+      规格：`docs/ai-engineering-governed-delivery-platform-phase3-review-
+      2026-09-20.md`"第二轮"一节（调研 Definition of Ready/GitHub
+      spec-kit 等业内需求准入模板的结论也记在这轮对话里）
+      验收：`open_questions` 非空禁止冻结（抄 spec-kit 的
+      "[NEEDS CLARIFICATION]" 机制）；`HarnessStatus` 加
+      `WAITING_FOR_HUMAN`，manual_evidence 未解决时不再无意义消耗修复
+      轮次；豁免 `expires_at` 必须带时区且晚于当前时间
+      （`InvalidWaiverError`）；单轮验收结果拒绝重复/未知 ac_id；
+      `contract/service.py`、`harness/service.py` 两个都因超 250 行/
+      文件上限拆分成多文件，外部调用方 import 不变；mypy strict/ruff/
+      pytest 全绿（70 个测试，完成时快照）
+      范围：仅 `platform/` 目录
+      不做：真实任务试跑——仍然是下一个独立任务

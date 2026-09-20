@@ -11,6 +11,7 @@ from govplatform.contract.service import (
     ContractConflictError,
     ContractStateError,
     ContractValidationError,
+    InvalidWaiverError,
     SensitiveContentError,
     WaiverNotAllowedError,
 )
@@ -147,6 +148,8 @@ def request_waiver(contract_id: str, request: RequestWaiverRequest) -> Waiver:
     except ContractStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except WaiverNotAllowedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except InvalidWaiverError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except SensitiveContentError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
