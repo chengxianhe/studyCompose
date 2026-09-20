@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from govplatform.contract import service as contract_service
-from govplatform.contract.models import AcceptanceCriterion, Contract, VerificationCase
+from govplatform.contract.models import AcceptanceCriterion, Contract, VerificationCase, Waiver
 from govplatform.contract.service import (
+    ContractConflictError,
     ContractStateError,
     ContractValidationError,
     SensitiveContentError,
+    WaiverNotAllowedError,
 )
 from govplatform.identity.models import Principal, PrincipalNotAllowedError
 
@@ -30,6 +34,7 @@ class CreateContractRequest(BaseModel):
 
 class UpdateContractRequest(BaseModel):
     caller: Principal
+    expected_version: int
     title: str | None = None
     goal: str | None = None
     scope: str | None = None
@@ -47,6 +52,14 @@ class FreezeContractRequest(BaseModel):
 
 class GetContractRequest(BaseModel):
     caller: Principal
+
+
+class RequestWaiverRequest(BaseModel):
+    caller: Principal
+    ac_id: str
+    reason: str
+    risk: str
+    expires_at: datetime
 
 
 @router.post("", response_model=Contract)
@@ -76,6 +89,7 @@ def update_contract(contract_id: str, request: UpdateContractRequest) -> Contrac
         return contract_service.update(
             contract_id=contract_id,
             caller=request.caller,
+            expected_version=request.expected_version,
             title=request.title,
             goal=request.goal,
             scope=request.scope,
@@ -90,6 +104,8 @@ def update_contract(contract_id: str, request: UpdateContractRequest) -> Contrac
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ContractStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ContractConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except SensitiveContentError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -111,3 +127,26 @@ def freeze_contract(contract_id: str, request: FreezeContractRequest) -> Contrac
 @router.post("/{contract_id}/get", response_model=Contract | None)
 def get_contract(contract_id: str, request: GetContractRequest) -> Contract | None:
     return contract_service.get(contract_id, caller=request.caller)
+
+
+# 豁免不做 MCP 工具，只走 HTTP——跟 freeze/approve/deprecate 一样，
+# 只有 Human 能碰的动作不给 AI 一个可以调用的工具，不是"给了但会被拒绝"。
+@router.post("/{contract_id}/waivers", response_model=Waiver)
+def request_waiver(contract_id: str, request: RequestWaiverRequest) -> Waiver:
+    try:
+        return contract_service.request_waiver(
+            contract_id=contract_id,
+            ac_id=request.ac_id,
+            caller=request.caller,
+            reason=request.reason,
+            risk=request.risk,
+            expires_at=request.expires_at,
+        )
+    except PrincipalNotAllowedError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ContractStateError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except WaiverNotAllowedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except SensitiveContentError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

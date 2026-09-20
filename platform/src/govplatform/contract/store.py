@@ -10,6 +10,7 @@ from govplatform.contract.models import (
     ContractStatus,
     KnowledgeSnapshot,
     VerificationCase,
+    Waiver,
 )
 from govplatform.identity.models import Agent, Human, Principal
 
@@ -28,8 +29,36 @@ def insert(conn: sqlite3.Connection, contract: Contract) -> None:
     )
 
 
-def update(conn: sqlite3.Connection, contract: Contract) -> None:
-    conn.execute(
+def update(
+    conn: sqlite3.Connection, contract: Contract, *, expected_version: int | None = None
+) -> bool:
+    """写回一份契约。`expected_version` 不传时（`freeze()` 走这条路）无条件按
+    contract_id 覆盖，跟原来行为一致。
+
+    传了的话（`contract_service.update()` 走这条路），WHERE 子句里带上
+    `AND version = ?`，让"版本没被人抢先改过"这个检查和真正写入变成同一条
+    SQL 语句、同一个事务——`contract_service.update()` 之前是先在 Python
+    里读一次当前版本、判断通过后再单独发一条不带版本条件的 UPDATE，这两步
+    之间有个时间窗口：另一个并发写入可以插在中间，先读的这次浑然不知，
+    还是会把自己的改动写进去，静默覆盖掉中间那次修改，乐观锁形同虚设。
+    返回值是"这次写入是否真的生效了"（`cursor.rowcount > 0`），version 没
+    对上时返回 False，调用方据此判断要不要抛 `ContractConflictError`。
+    """
+    if expected_version is None:
+        conn.execute(
+            """
+            UPDATE contracts SET
+                title = ?, goal = ?, scope = ?, out_of_scope = ?, author_json = ?,
+                status = ?, version = ?, acceptance_criteria_json = ?,
+                test_cases_json = ?, knowledge_refs_json = ?,
+                knowledge_snapshots_json = ?, risks_json = ?, open_questions_json = ?,
+                frozen_by = ?, frozen_at = ?, created_at = ?, updated_at = ?
+            WHERE contract_id = ?
+            """,
+            (*_params(contract)[1:], contract.contract_id),
+        )
+        return True
+    cursor = conn.execute(
         """
         UPDATE contracts SET
             title = ?, goal = ?, scope = ?, out_of_scope = ?, author_json = ?,
@@ -37,10 +66,11 @@ def update(conn: sqlite3.Connection, contract: Contract) -> None:
             test_cases_json = ?, knowledge_refs_json = ?,
             knowledge_snapshots_json = ?, risks_json = ?, open_questions_json = ?,
             frozen_by = ?, frozen_at = ?, created_at = ?, updated_at = ?
-        WHERE contract_id = ?
+        WHERE contract_id = ? AND version = ?
         """,
-        (*_params(contract)[1:], contract.contract_id),
+        (*_params(contract)[1:], contract.contract_id, expected_version),
     )
+    return cursor.rowcount > 0
 
 
 def get(conn: sqlite3.Connection, contract_id: str) -> Contract | None:
@@ -70,6 +100,47 @@ def _params(contract: Contract) -> tuple[object, ...]:
         contract.frozen_at.isoformat() if contract.frozen_at else None,
         contract.created_at.isoformat(),
         contract.updated_at.isoformat(),
+    )
+
+
+def insert_waiver(conn: sqlite3.Connection, waiver: Waiver) -> None:
+    conn.execute(
+        """
+        INSERT INTO waivers (
+            waiver_id, contract_id, ac_id, reason, risk, approved_by,
+            created_at, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            waiver.waiver_id,
+            waiver.contract_id,
+            waiver.ac_id,
+            waiver.reason,
+            waiver.risk,
+            waiver.approved_by,
+            waiver.created_at.isoformat(),
+            waiver.expires_at.isoformat(),
+        ),
+    )
+
+
+def list_waivers(conn: sqlite3.Connection, contract_id: str) -> list[Waiver]:
+    rows = conn.execute(
+        "SELECT * FROM waivers WHERE contract_id = ? ORDER BY created_at ASC", (contract_id,)
+    ).fetchall()
+    return [_row_to_waiver(row) for row in rows]
+
+
+def _row_to_waiver(row: sqlite3.Row) -> Waiver:
+    return Waiver(
+        waiver_id=row["waiver_id"],
+        contract_id=row["contract_id"],
+        ac_id=row["ac_id"],
+        reason=row["reason"],
+        risk=row["risk"],
+        approved_by=row["approved_by"],
+        created_at=datetime.fromisoformat(row["created_at"]),
+        expires_at=datetime.fromisoformat(row["expires_at"]),
     )
 
 

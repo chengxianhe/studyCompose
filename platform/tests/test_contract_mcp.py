@@ -18,6 +18,7 @@ async def test_mcp_create_update_get_round_trip(claude_code_agent: Agent) -> Non
     updated = await contract_update(
         contract_id=created.contract_id,
         caller=claude_code_agent,
+        expected_version=created.version,
         acceptance_criteria=[
             AcceptanceCriterion(
                 ac_id="AC-1",

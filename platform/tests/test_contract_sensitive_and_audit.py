@@ -4,6 +4,7 @@ import pytest
 
 from govplatform.audit.store import list_audit_events
 from govplatform.contract import service as contract_service
+from govplatform.contract.models import VerificationCase
 from govplatform.contract.service import SensitiveContentError
 from govplatform.db.connection import get_connection
 from govplatform.identity.models import Agent, Human
@@ -22,6 +23,24 @@ def test_create_rejects_sensitive_content_in_goal(claude_code_agent: Agent) -> N
         events = list_audit_events(conn)
     assert len(events) == 1
     assert events[0].action == "contract.create.rejected"
+
+
+def test_create_rejects_sensitive_content_in_test_case_description(
+    claude_code_agent: Agent,
+) -> None:
+    """TC 描述是自由文本，跟 AC 字段/title/goal 一样要过敏感信息筛查——
+    之前的实现漏了这个字段，写测试数据的人可以在这里绕开筛查。
+    """
+    with pytest.raises(SensitiveContentError):
+        contract_service.create(
+            title="标题正常",
+            goal="目标正常",
+            scope="范围正常",
+            caller=claude_code_agent,
+            test_cases=[
+                VerificationCase(tc_id="TC-1", description="用手机号 13812345678 登录测试")
+            ],
+        )
 
 
 def test_get_writes_an_audit_event(claude_code_agent: Agent, owner_human: Human) -> None:

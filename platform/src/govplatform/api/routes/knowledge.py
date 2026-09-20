@@ -11,6 +11,7 @@ from govplatform.knowledge.models import AuthorityLevel, KnowledgeType
 from govplatform.knowledge.service import (
     ApprovalError,
     InvalidTimeRangeError,
+    KnowledgeStateError,
     ProposeResponse,
     SensitiveContentError,
 )
@@ -41,6 +42,11 @@ class SearchRequest(BaseModel):
 
 class ApproveRequest(BaseModel):
     caller: Principal
+
+
+class DeprecateRequest(BaseModel):
+    caller: Principal
+    reason: str
 
 
 @router.post("/propose", response_model=ProposeResponse)
@@ -86,5 +92,20 @@ def approve_knowledge(knowledge_id: str, request: ApproveRequest) -> ProposeResp
     except PrincipalNotAllowedError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ApprovalError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return ProposeResponse(knowledge_id=obj.knowledge_id, status=obj.status, version=obj.version)
+
+
+@router.post("/{knowledge_id}/deprecate", response_model=ProposeResponse)
+def deprecate_knowledge(knowledge_id: str, request: DeprecateRequest) -> ProposeResponse:
+    try:
+        obj = knowledge_service.deprecate(
+            knowledge_id=knowledge_id, caller=request.caller, reason=request.reason
+        )
+    except PrincipalNotAllowedError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except SensitiveContentError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except KnowledgeStateError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return ProposeResponse(knowledge_id=obj.knowledge_id, status=obj.status, version=obj.version)

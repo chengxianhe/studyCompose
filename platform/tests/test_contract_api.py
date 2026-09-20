@@ -66,3 +66,31 @@ def test_freeze_rejects_incomplete_contract_with_422() -> None:
         f"/contracts/{contract_id}/freeze", json={"caller": _OWNER_CALLER}
     )
     assert freeze_response.status_code == 422
+
+
+def test_update_rejects_stale_version_with_409() -> None:
+    client = TestClient(create_app())
+
+    create_response = client.post(
+        "/contracts",
+        json={
+            "title": "并发编辑测试",
+            "goal": "目标",
+            "scope": "范围",
+            "caller": _CLAUDE_CODE_CALLER,
+        },
+    )
+    contract_id = create_response.json()["contract_id"]
+
+    first_update = client.put(
+        f"/contracts/{contract_id}",
+        json={"caller": _CLAUDE_CODE_CALLER, "expected_version": 1, "title": "第一次修改"},
+    )
+    assert first_update.status_code == 200
+    assert first_update.json()["version"] == 2
+
+    stale_update = client.put(
+        f"/contracts/{contract_id}",
+        json={"caller": _CLAUDE_CODE_CALLER, "expected_version": 1, "title": "基于旧版本的修改"},
+    )
+    assert stale_update.status_code == 409

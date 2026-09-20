@@ -58,3 +58,39 @@
       全绿（42 个测试，完成时快照）
       范围：仅 `platform/` 目录
       不做：契约版本替换、内容质量校验——同上一条理由
+- [x] T-P5 `platform/` 修两个真漏洞：知识下线机制、契约并发编辑保护
+      （2026-09-19）
+      规格：同上 baseline 文档 §6，用户自己复盘发现（不是交叉审查）
+      验收：knowledge_service.deprecate()（Human-only，要求 reason）把
+      active 知识转 deprecated，search() 自动搜不到；contract_service.
+      update() 要求 expected_version 做乐观锁，版本对不上拒绝
+      （ContractConflictError，HTTP 409），成功后版本号加一；mypy
+      strict/ruff/pytest 全绿（48 个测试，完成时快照）
+      范围：仅 `platform/` 目录
+      不做：知识"取消下线"（撤销的撤销）、freeze() 的并发保护（本轮只
+      解决 update() 被识别出来的那个具体缺口）
+- [x] T-P6 `platform/` 阶段3：Harness 状态追踪 + 豁免机制（2026-09-20）
+      规格：baseline 文档 §7（三道门禁+豁免机制设计，含调研 Google/
+      Microsoft/国内大厂/Anthropic 自己公开实践的结论）
+      验收：`harness/` 模块记录完整状态机（开发→入门禁→验收→修复
+      最多3轮→通过/升级）；豁免独立对象、Human-only、必填理由/风险/
+      到期时间、到期 fail closed；涉及生产数据/不可逆操作的 AC 不允许
+      豁免，契约冻结时要求写回滚方案；`harness.deliver` 只有 Human 能做；
+      用构造场景手工跑通完整流程；mypy strict/ruff/pytest 全绿（59 个
+      测试，完成时快照）
+      范围：仅 `platform/` 目录
+      不做：真的用 `Agent` 工具跑一次 studyCompose 真实功能——这是下一
+      个独立任务，需要先选定功能、走需求准入门禁、起草冻结契约
+- [x] T-P7 `platform/` 阶段3交叉审查修复：Harness 三个 P0 + 契约两个
+      P1（2026-09-20）
+      规格：`docs/ai-engineering-governed-delivery-platform-phase3-review-
+      2026-09-20.md`（baseline 文档已超 250 行上限，这轮记录单开文件）
+      验收：harness.start 改 Human-only 且从 MCP 工具里删掉；
+      manual_evidence 类型 AC 只有 Human 调用才能判 passed，Agent 提交
+      的一律当未解决；acceptance_results 跨轮次累积不再覆盖；契约乐观锁
+      改成 `WHERE ... AND version = ?` 原子写入；豁免要求契约必须已冻结；
+      TC 描述补进敏感信息筛查；mypy strict/ruff/pytest 全绿（65 个测试，
+      完成时快照）
+      范围：仅 `platform/` 目录
+      不做：freeze() 自身的并发窗口（概率极低、Human-only，本轮只修
+      审查具体指出的缺口）

@@ -46,6 +46,10 @@ class InvalidTimeRangeError(Exception):
     """propose() 因为 expire_at 不晚于 effective_at 被拒绝时抛出。"""
 
 
+class KnowledgeStateError(Exception):
+    """deprecate() 操作不是 active 状态的知识时抛出。"""
+
+
 def _now() -> datetime:
     return datetime.now(UTC)
 
@@ -219,6 +223,58 @@ def approve(*, knowledge_id: str, caller: Principal) -> KnowledgeObject:
         approved = knowledge_store.get(conn, knowledge_id)
     assert approved is not None
     return approved
+
+
+def deprecate(*, knowledge_id: str, caller: Principal, reason: str) -> KnowledgeObject:
+    """把一条生效中的知识下线。
+
+    只有 Human 能做（跟 approve() 一样的身份限制——批准是治理决定，撤销
+    也是，AI 不能自己判断"这条规则不该再生效了"）。下线之后状态变成
+    deprecated，`search()` 只查 active 状态，会自动搜不到，不用额外改
+    检索逻辑。没有"取消下线"的路——批错了就重新 propose 一条新的，不做
+    撤销的撤销，避免搞一套没人会用的状态回退机制。
+    """
+    resolved = resolve_principal(caller)
+    if not isinstance(resolved, Human):
+        raise PrincipalNotAllowedError("only a human owner can deprecate a knowledge object")
+    sensitive_reason = find_sensitive_reason(reason)
+    if sensitive_reason is not None:
+        raise SensitiveContentError(f"疑似包含敏感信息（{sensitive_reason}），拒绝记录")
+    now = _now()
+    principal_type, principal_id, session_id = _principal_type_and_id(resolved)
+    with get_connection() as conn:
+        existing = knowledge_store.get(conn, knowledge_id)
+        if existing is None:
+            raise KnowledgeStateError(f"unknown knowledge_id {knowledge_id!r}")
+        if existing.status != KnowledgeStatus.ACTIVE:
+            raise KnowledgeStateError(
+                f"knowledge_id {knowledge_id!r} is {existing.status.value}, only active "
+                "knowledge can be deprecated"
+            )
+        knowledge_store.update_status(
+            conn,
+            knowledge_id,
+            status=KnowledgeStatus.DEPRECATED,
+            owner=existing.owner,
+            updated_at=now,
+        )
+        insert_audit_event(
+            conn,
+            AuditEvent(
+                occurred_at=now,
+                principal_type=principal_type,
+                principal_id=principal_id,
+                session_id=session_id,
+                action="knowledge.deprecate",
+                knowledge_id=knowledge_id,
+                knowledge_version=existing.version,
+                request_json=json.dumps({"reason": reason}),
+                result_summary="status=deprecated",
+            ),
+        )
+        deprecated = knowledge_store.get(conn, knowledge_id)
+    assert deprecated is not None
+    return deprecated
 
 
 def get(knowledge_id: str) -> KnowledgeObject | None:

@@ -6,6 +6,8 @@ from mcp.server.mcpserver import MCPServer
 
 from govplatform.contract import service as contract_service
 from govplatform.contract.models import AcceptanceCriterion, Contract, VerificationCase
+from govplatform.harness import service as harness_service
+from govplatform.harness.models import AcceptanceResult, HarnessRun
 from govplatform.identity.models import Principal
 from govplatform.knowledge import service as knowledge_service
 from govplatform.knowledge.models import AuthorityLevel, KnowledgeType
@@ -85,6 +87,7 @@ async def contract_create(
 async def contract_update(
     contract_id: str,
     caller: Principal,
+    expected_version: int,
     title: str | None = None,
     goal: str | None = None,
     scope: str | None = None,
@@ -98,6 +101,7 @@ async def contract_update(
     return contract_service.update(
         contract_id=contract_id,
         caller=caller,
+        expected_version=expected_version,
         title=title,
         goal=goal,
         scope=scope,
@@ -113,6 +117,27 @@ async def contract_update(
 @mcp.tool(name="contract.get")
 async def contract_get(contract_id: str, caller: Principal) -> Contract | None:
     return contract_service.get(contract_id, caller=caller)
+
+
+@mcp.tool(name="harness.record_entry_gate")
+async def harness_record_entry_gate(
+    run_id: str, caller: Principal, passed: bool, command: str, summary: str
+) -> HarnessRun:
+    return harness_service.record_entry_gate(
+        run_id=run_id, caller=caller, passed=passed, command=command, summary=summary
+    )
+
+
+@mcp.tool(name="harness.record_acceptance")
+async def harness_record_acceptance(
+    run_id: str, caller: Principal, results: list[AcceptanceResult]
+) -> HarnessRun:
+    return harness_service.record_acceptance(run_id=run_id, caller=caller, results=results)
+
+
+@mcp.tool(name="harness.get")
+async def harness_get(run_id: str, caller: Principal) -> HarnessRun | None:
+    return harness_service.get(run_id, caller=caller)
 
 
 def main() -> None:

@@ -40,6 +40,35 @@ CREATE TABLE IF NOT EXISTS contracts (
   updated_at                   TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS waivers (
+  waiver_id    TEXT PRIMARY KEY,
+  contract_id  TEXT NOT NULL,
+  ac_id        TEXT NOT NULL,
+  reason       TEXT NOT NULL,
+  risk         TEXT NOT NULL,
+  approved_by  TEXT NOT NULL,
+  created_at   TEXT NOT NULL,
+  expires_at   TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_waivers_contract_ac
+  ON waivers (contract_id, ac_id);
+
+CREATE TABLE IF NOT EXISTS harness_runs (
+  run_id                   TEXT PRIMARY KEY,
+  contract_id              TEXT NOT NULL,
+  status                   TEXT NOT NULL,
+  repair_round             INTEGER NOT NULL,
+  entry_gate_results_json  TEXT NOT NULL,
+  acceptance_results_json  TEXT NOT NULL,
+  repair_rounds_json       TEXT NOT NULL,
+  escalation_reason        TEXT,
+  started_by               TEXT NOT NULL,
+  created_at               TEXT NOT NULL,
+  updated_at                TEXT NOT NULL,
+  delivered_at               TEXT
+);
+
 CREATE TABLE IF NOT EXISTS audit_events (
   id                INTEGER PRIMARY KEY AUTOINCREMENT,
   occurred_at       TEXT NOT NULL,

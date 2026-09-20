@@ -46,3 +46,33 @@ def test_approve_requires_human_owner_and_flips_status() -> None:
     )
     assert search_response.status_code == 200
     assert any(r["knowledge_id"] == knowledge_id for r in search_response.json()["results"])
+
+    agent_deprecate = client.post(
+        f"/knowledge/{knowledge_id}/deprecate",
+        json={
+            "caller": {"principal_type": "agent", "kind": "claude-code", "session_id": "api-test"},
+            "reason": "AI 不该能自己下线知识",
+        },
+    )
+    assert agent_deprecate.status_code == 403
+
+    owner_deprecate = client.post(
+        f"/knowledge/{knowledge_id}/deprecate",
+        json={
+            "caller": {"principal_type": "human", "id": "chengxianhe0@gmail.com"},
+            "reason": "已经被新规则取代",
+        },
+    )
+    assert owner_deprecate.status_code == 200
+    assert owner_deprecate.json()["status"] == "deprecated"
+
+    search_after_deprecate = client.post(
+        "/knowledge/search",
+        json={
+            "query": "api propose approve search",
+            "caller": {"principal_type": "human", "id": "chengxianhe0@gmail.com"},
+        },
+    )
+    assert not any(
+        r["knowledge_id"] == knowledge_id for r in search_after_deprecate.json()["results"]
+    )

@@ -31,6 +31,13 @@ class AcceptanceCriterion(BaseModel):
     expected_result: str = ""
     verification_type: VerificationType
     test_case_ids: list[str] = Field(default_factory=list)
+    # 涉及生产数据或者不可逆操作的验收标准，标 True。用途：①这类 AC 不
+    # 允许申请豁免（哪怕修复三次都通不过，也不能绕过，必须真做对）；
+    # ②契约冻结时如果有 AC 标了这个，risks 字段不能为空（必须写清楚
+    # 回滚方案）。两条限制都是从 Anthropic 自己公开的工程实践（关键动作
+    # 永远人工终审）和国内大厂"变更三板斧"（可回滚）调研来的，不是拍脑袋
+    # 加的字段。
+    touches_production_or_irreversible: bool = False
 
 
 class KnowledgeSnapshot(BaseModel):
@@ -44,6 +51,25 @@ class KnowledgeSnapshot(BaseModel):
     knowledge_id: str
     version: int
     content_hash: str
+
+
+class Waiver(BaseModel):
+    """契约里某条验收标准的例外——不是"这条不用管了"，是"承担了这个
+    风险，有到期时间，到期自动失效"。设计依据见
+    `docs/ai-engineering-governed-delivery-platform-baseline.md` §7.3
+    （调研 SOC2/DevSecOps 领域关于豁免机制的共识）：独立对象、精确关联
+    到哪个契约的哪条 AC（不能笼统豁免整份契约）、只有 Human 能创建、
+    必填理由/风险/到期时间、不允许永久豁免。
+    """
+
+    waiver_id: str
+    contract_id: str
+    ac_id: str
+    reason: str
+    risk: str
+    approved_by: str
+    created_at: datetime
+    expires_at: datetime
 
 
 class ContractStatus(StrEnum):
