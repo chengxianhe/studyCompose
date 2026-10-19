@@ -13,8 +13,9 @@ offline-first 的官方样板项目，本项目 build-logic 的约定插件设�
 |---|---|---|
 | 新建 feature 模块 | `feature/home/` | 模块结构、`studycompose.android.feature` 约定插件已经带好 domain/core/Hilt 依赖 |
 | 页面三态 | `core/ui/src/main/kotlin/com/study/cc/core/ui/state/` | `LoadingState`/`EmptyState`/`ErrorState` 用法 |
-| 新建 UseCase | （待补，参照 NiA `core/domain` 下的 UseCase 写法） | |
-| 离线优先 Repository | （待补，参照 NiA `core/data` 下的 Repository 写法） | |
+| 新建 UseCase | `domain/src/main/kotlin/com/study/cc/domain/usecase/GetResearchSignalsUseCase.kt` | 参照 NiA `GetFollowableTopicsUseCase` 的 `operator fun invoke()` 写法；**跟 NiA 不同**：Repository 接口必须放在 `domain/.../repository/`（不是 NiA 的 `core.data.repository`），因为本项目 Konsist 断言 domain 不允许出现任何 `.data.` import；UseCase 不用 `@Inject constructor`（domain 不接 DI 框架依赖），改由 `data/.../di/ResearchSignalUseCaseModule.kt` 用 `@Provides` 提供实例 |
+| 简单 Repository（非离线优先） | `domain/src/main/kotlin/com/study/cc/domain/repository/ResearchSignalRepository.kt` + `data/src/main/kotlin/com/study/cc/data/repository/InMemoryResearchSignalRepository.kt` | 接口在 domain、实现在 data，Hilt `@Binds` 绑定参照 `core/logging/LoggingModule.kt` 的写法；这个例子是内存假数据源（"A股事件驱动研究雷达"后端还没做出来之前的占位），不是真离线优先同步，下面那行仍然待补 |
+| 离线优先 Repository | （待补，参照 NiA `core/data` 下 `OfflineFirstXxxRepository` + `changeListSync` 的写法；接口位置仍要按上面那条改放 domain） | |
 | 分页列表 | （待补，参照 NiA 的 Paging3 用法） | |
 | 表单校验 | （待补） | |
 

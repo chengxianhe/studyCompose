@@ -1,5 +1,5 @@
 ## 当前任务
-- [ ] T-001 <一句话>
+- [ ] T-004 <一句话，从下面两个方向选一个：接真后端 / 做事件详情页>
       规格：specs/xxx.md
       验收：<具体到可验证>
       范围：<只允许改哪些目录>
@@ -8,6 +8,59 @@
 ## 待办
 
 ## 已完成
+- [x] T-003a T-003 的 Codex 交叉审查修复（2026-10-19）
+      规格：Codex 只读审查报告（本次会话），逐条对照代码核实后修复
+      验收：`./gradlew :konsistTest:test detekt lint test` 全绿（含 3 个
+      domain + 5 个 HomeViewModel 测试，完成时快照）；ViewModel 测试
+      真正覆盖 loading→数据、loading→error、重试恢复订阅、连点防重入、
+      刷新失败；`ResearchSignal` 加稳定 `id` 作列表 key；正收益占比改
+      `Double`（方案文档示例 68.1%）；数据流报错后"重试"会重新订阅；
+      刷新防重入、不吞 `CancellationException`；错误改 `hasError` +
+      本地化文案，不再透传原始异常文字；空信号时仍显示每日汇总；
+      `collectAsStateWithLifecycle`（新增 `lifecycle-runtime-compose`
+      依赖）
+      范围：`domain/` `data/` `feature/home/`、`gradle/libs.versions.toml`、
+      `AndroidFeatureConventionPlugin.kt`
+      不做：`SignalCard` 卡片容器——`:core:designsystem` 里没有 `AppCard`，
+      按设计系统规则停下来等用户决定；ViewModel 上游订阅随页面生命周期
+      暂停（`stateIn(WhileSubscribed)`）——内存假数据源下无影响，接真数据源
+      时再做；失败路径未接 `Logger`
+- [x] T-003 用真实业务替换 Home 测试脚手架：A股事件驱动研究雷达首页
+      （假数据版）（2026-09-21）
+      规格：`~/Downloads/a_share_event_news_radar_v1.md`（用户提供的产品
+      方案）§26"首页"
+      验收：删掉 T-002 的 `HomeItem`/`HomeItemRepository` 等测试用占位
+      代码，换成 `ResearchSignal`/`DailySummary` 真实领域模型；
+      `./gradlew :konsistTest:test detekt lint test` 全绿；
+      `:app:assembleDebug` 编译通过；模拟器装包启动后首页展示汇总数字 +
+      事件候选卡列表，点刷新不崩溃；新增单元测试通过
+      范围：`domain/` `data/` `feature/home/`（`app/`/`build-logic/`/
+      `gradle/libs.versions.toml` 里 T-002 加的 Hilt 基础设施原样保留未动）
+      不做：接真后端（财联社/东财/巨潮抓取 + FastAPI，方案文档还没做）、
+      事件详情页/股票详情页（需要导航，字段更多，留给下一个任务）、真实
+      抓取与合规评估（方案文档 §5 数据源 ToS 风险、§20 证券投资咨询合规，
+      这两条在对外发布前必须单独过一遍，这次只搭 UI 骨架不涉及）
+- [x] T-002 首个真实 Home 列表页：UseCase/Repository 落地 + Hilt 首次真正跑通
+      （2026-09-21）
+      规格：本次会话对话记录 + `docs/patterns/README.md`"新建 UseCase"/
+      "简单 Repository（非离线优先）"两行（参照 Now in Android
+      `GetFollowableTopicsUseCase`/`TopicsRepository`，按本项目 Konsist
+      规则把 Repository 接口挪进 domain）
+      验收：`./gradlew :konsistTest:test detekt lint test` 全绿；
+      `:app:assembleDebug` 编译通过；模拟器装包启动后首页正常展示列表，
+      点刷新按钮不崩溃、logcat 无异常；domain/feature 新增 6 个单元测试
+      通过（Turbine 覆盖 loading→数据/loading→error 两条路径）
+      （此数字是 T-002 完成时快照；这批脚手架测试已在 T-003 删除，
+      当前测试数见 T-003a）
+      范围：`domain/` `data/` `feature/home/` `app/`
+      （`MainActivity`/`AndroidManifest`/新增 `StudyComposeApplication`）
+      `gradle/libs.versions.toml`、
+      `build-logic/convention/.../AndroidFeatureConventionPlugin.kt`
+      （新增 `hilt-navigation-compose` 依赖）
+      不做：Room/Retrofit 真实网络与离线优先同步、导航、下拉手势刷新、
+      删除 `MainActivity` 里原有的 CounterScreen 计数器 demo 代码；点刷新
+      后的瞬时 loading 态没能在真机截图上稳定复现（600ms 窗口比 CLI 截图
+      往返耗时短），改用单元测试覆盖这条路径
 - [x] T-P0 `platform/` 阶段0/1：受控知识库原型（2026-09-18）
       规格：`docs/ai-engineering-governed-delivery-platform.md`（原方案）+
       `docs/ai-engineering-governed-delivery-platform-baseline.md`（阶段0

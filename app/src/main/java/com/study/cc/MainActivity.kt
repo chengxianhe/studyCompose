@@ -53,9 +53,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 // dp 是与屏幕密度无关的尺寸单位，保证不同设备上的视觉间距更一致。
 import androidx.compose.ui.unit.dp
-// 导入创建项目时生成的主题，统一整个 App 的 Material 配色和字体。
+// AppTheme 是 :core:designsystem 的主题入口，视觉 token 的唯一来源。
+import com.study.cc.core.designsystem.theme.AppTheme
+// HomeRoute 是 feature:home 对外暴露的首页入口 Composable。
+import com.study.cc.feature.home.HomeRoute
+// 旧的 Android Studio 生成主题，CounterScreenPreview 仍在用，保留供其预览使用。
 import com.study.cc.ui.theme.StudyComposeTheme
+// AndroidEntryPoint 让 Hilt 能给这个 Activity（以及它下面的 Compose 树）注入依赖。
+import dagger.hilt.android.AndroidEntryPoint
 
+// AndroidEntryPoint 标记这是 Hilt 依赖图的一个入口，配合 StudyComposeApplication 的 @HiltAndroidApp 生效。
+@AndroidEntryPoint
 // MainActivity 是应用启动后展示本页面的 Android 入口。
 class MainActivity : ComponentActivity() {
     // onCreate 是 Activity 首次创建时的生命周期回调，相当于页面初始化入口。
@@ -67,10 +75,10 @@ class MainActivity : ComponentActivity() {
 
         // 从这里开始声明 Activity 要显示的 Compose UI，而不是加载 XML 布局文件。
         setContent {
-            // 把整页放进项目主题中，子组件可通过 MaterialTheme 读取统一样式。
-            StudyComposeTheme {
-                // CounterPage 持有页面状态；它再把状态和事件交给纯展示用的 CounterScreen。
-                CounterPage()
+            // 把整页放进设计系统主题中，子组件可通过 MaterialTheme 读取统一样式。
+            AppTheme {
+                // HomeRoute 自己持有 Hilt 注入的 ViewModel，负责首页的状态和事件。
+                HomeRoute()
             }
         }
     }

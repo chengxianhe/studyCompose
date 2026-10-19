@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">事件雷达</string>
+    <string name="home_refresh_action">刷新</string>
+    <string name="home_refreshing_label">刷新中…</string>
+    <string name="home_empty_message">暂无研究候选</string>
+    <string name="home_retry_action">重试</string>
+    <string name="home_error_message">加载失败，请重试</string>
+    <string name="home_summary_scanned">今日扫描</string>
+    <string name="home_summary_merged">合并事件</string>
+    <string name="home_summary_effective">有效事件</string>
+    <string name="home_summary_candidates">重点候选</string>
+    <string name="home_signal_relevance">业务相关度 %1$d%%</string>
+    <string name="home_signal_recent_change">近20日 %1$s</string>
+    <string name="home_signal_sector_change">板块同期 %1$s</string>
+    <string name="home_signal_history">历史类似事件 %1$d 次</string>
+    <string name="home_signal_positive_ratio">20日正收益占比 %1$s%%</string>
+</resources>
