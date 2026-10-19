@@ -98,9 +98,15 @@ Color / Spacing / Type / Sizes / Radius / Elevation），业务代码禁止内�
 带参数用占位符不要拼接；复数用 `plurals`；布局用 `start`/`end` 不用 `left`/`right`。
 
 ## 自检要求（每次改完必须执行）
-    ./gradlew :konsistTest:test detekt lint test
+    ./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard
 
 全部通过才算完成。
+
+- `spotlessCheck` 失败：运行 `./gradlew spotlessApply`，格式化改动单独提交，不夹带逻辑
+  改动。ktlint 的行宽已与 detekt 对齐为 120，两者不会互相矛盾。
+- `:app:dependencyGuard` 失败：说明最终打进 APK 的依赖变了。逐项确认差异都是有意引入后，
+  运行 `./gradlew :app:dependencyGuardBaseline`，基线文件随引入依赖的那次提交一起提交，
+  提交信息列出新增的库；不要为了变绿而盲目刷新基线。
 
 **架构测试失败时必须修实现，禁止修改 Konsist 断言、detekt 配置或 lint 抑制来变绿。
 如果你认为某条规则本身有问题，停下来告诉我，由我决定是否调整。**
