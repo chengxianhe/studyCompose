@@ -1,9 +1,12 @@
 ## 当前任务
-（当前无进行中的任务；下一条：见「待办」T-005）
+（当前无进行中的任务；「待办」也已清空，下一条等用户定义）
 
 ## 待办
-- [ ] T-005 软门禁清零：更新 dependencyGuard 依赖基线、统一 spotless 格式，
-      并把这两项纳入自检清单（T-004 提交完成后再做）
+（暂无）
+
+## 已完成
+- [x] T-005 软门禁清零：更新 dependencyGuard 依赖基线、统一 spotless 格式，
+      并把这两项纳入自检清单（2026-10-19）
       规格：2026-10-19 验收 T-004 时核实——`./gradlew :app:dependencyGuard`
       失败，差异仅为 `hilt-navigation-compose` 带入的 9 项（T-002/T-003
       提交 e34ec0f 引入后未更新基线）；`./gradlew spotlessCheck` 对
@@ -36,8 +39,21 @@
       前置：T-004 先提交，避免格式化与 T-004 未提交文件互相踩；T-004 里
       有意引入的 `desugar_jdk_libs` 是 `coreLibraryDesugaring` 配置，预计不
       影响 `releaseRuntimeClasspath`，该任务开始时实际验证
-
-## 已完成
+      完成情况：按计划分提交，另有一处必要的偏差——
+      ① `8395e29` 依赖基线：`:app:dependencyGuardBaseline`，差异恰为 9 行新增、0 行删除，
+      提交只含 `app/dependencies/releaseRuntimeClasspath.txt`；
+      ② `5fa9232` 先对齐行宽（偏差：计划里是两个提交，这里多出这个）：spotless 的 ktlint
+      设 `max_line_length=120`，与 detekt 一致，ktlint 变严而非放宽；不先做这步，格式化会让
+      detekt 变红；
+      ③ `430582c` 格式统一：13 个文件，逐个把改前改后去掉空白/尾逗号/import 顺序后比较，
+      13 个全部相同（纯格式），测试数不变；
+      ④ CLAUDE.md 自检清单加入 `spotlessCheck`、`:app:dependencyGuard`（单独提交）。
+      验证：`./gradlew :konsistTest:test detekt lint test :app:assembleDebug spotlessCheck
+      :app:dependencyGuard` 全部通过（domain 10、data 29、Konsist 21、home 5，失败 0），
+      这是项目第一次所有门禁同时为绿
+      未做/留意：CLAUDE.md「交叉审查（Codex）」一节仍写着"没有直接调用 Codex 的工具"，
+      已与实际流程不符，但改它涉及分工约定，留给用户决定；`:app:assembleDebug` 目前不在
+      自检清单里，但它能发现 Hilt 依赖图错误（T-004 验收时靠它），建议用户考虑加入
 - [x] T-004 A股行情数据 V1（2026-10-19）：在 `:data` 用腾讯财经接口取"证券搜索 / 单股报价 /
       日K线"三项（只做数据层，无 UI）
       规格：`~/Downloads/stock-data-api-development-guide.md` §3、§8.1、§10
