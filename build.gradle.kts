@@ -39,7 +39,13 @@ subprojects {
             target("src/**/*.kt")
             targetExclude("**/ui/theme/**", "**/MainActivity.kt", "**/ExampleUnitTest.kt", "**/ExampleInstrumentedTest.kt")
             // Compose 约定 Composable 函数名大写开头，和 ktlint 默认的函数命名规则冲突（同批次2 detekt 的处理）
-            ktlint().editorConfigOverride(mapOf("ktlint_function_naming_ignore_when_annotated_with" to "Composable"))
+            // 行宽与 detekt 的 MaxLineLength 保持一致（120）；ktlint 默认不限行宽，会把已折行的代码并回一行，导致两个门禁互相矛盾
+            ktlint().editorConfigOverride(
+                mapOf(
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                    "max_line_length" to "120",
+                ),
+            )
             trimTrailingWhitespace()
             endWithNewline()
         }
