@@ -53,12 +53,7 @@ internal val DarkColors =
     )
 
 @Immutable
-data class ExtendedColors(
-    val success: Color,
-    val onSuccess: Color,
-    val warning: Color,
-    val onWarning: Color,
-)
+data class ExtendedColors(val success: Color, val onSuccess: Color, val warning: Color, val onWarning: Color)
 
 internal val LightExtendedColors =
     ExtendedColors(

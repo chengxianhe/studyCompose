@@ -13,12 +13,7 @@ import androidx.compose.ui.Modifier
 import com.study.cc.core.designsystem.theme.Spacing
 
 @Composable
-fun ErrorState(
-    message: String,
-    retryLabel: String,
-    onRetryClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun ErrorState(message: String, retryLabel: String, onRetryClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()

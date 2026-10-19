@@ -14,15 +14,14 @@ class RefreshResearchSignalsUseCaseTest {
         var refreshCallCount = 0
             private set
 
-        override fun observeDailySummary(): Flow<DailySummary> =
-            flowOf(
-                DailySummary(
-                    scannedNewsCount = 0,
-                    mergedEventCount = 0,
-                    effectiveEventCount = 0,
-                    coreCandidateCount = 0,
-                ),
-            )
+        override fun observeDailySummary(): Flow<DailySummary> = flowOf(
+            DailySummary(
+                scannedNewsCount = 0,
+                mergedEventCount = 0,
+                effectiveEventCount = 0,
+                coreCandidateCount = 0,
+            ),
+        )
 
         override fun observeSignals(): Flow<List<ResearchSignal>> = flowOf(emptyList())
 
@@ -32,13 +31,12 @@ class RefreshResearchSignalsUseCaseTest {
     }
 
     @Test
-    fun `invoke 委托给 repository refresh`() =
-        runTest {
-            val repository = FakeResearchSignalRepository()
-            val useCase = RefreshResearchSignalsUseCase(repository)
+    fun `invoke 委托给 repository refresh`() = runTest {
+        val repository = FakeResearchSignalRepository()
+        val useCase = RefreshResearchSignalsUseCase(repository)
 
-            useCase()
+        useCase()
 
-            assertThat(repository.refreshCallCount).isEqualTo(1)
-        }
+        assertThat(repository.refreshCallCount).isEqualTo(1)
+    }
 }

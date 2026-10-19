@@ -21,53 +21,53 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel
-    @Inject
-    constructor(
-        private val getHomeSummaryUseCase: GetHomeSummaryUseCase,
-        private val getResearchSignalsUseCase: GetResearchSignalsUseCase,
-        private val refreshResearchSignalsUseCase: RefreshResearchSignalsUseCase,
-    ) : ViewModel() {
-        private val _uiState = MutableStateFlow(HomeUiState())
-        val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+@Inject
+constructor(
+    private val getHomeSummaryUseCase: GetHomeSummaryUseCase,
+    private val getResearchSignalsUseCase: GetResearchSignalsUseCase,
+    private val refreshResearchSignalsUseCase: RefreshResearchSignalsUseCase,
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-        private var observeJob: Job? = null
+    private var observeJob: Job? = null
 
-        init {
-            observeHomeData()
-        }
+    init {
+        observeHomeData()
+    }
 
-        fun onRefreshClick() {
-            if (_uiState.value.isRefreshing) return
-            viewModelScope.launch {
-                _uiState.update { it.copy(isRefreshing = true) }
-                try {
-                    runCatching { refreshResearchSignalsUseCase() }
-                        .onFailure { throwable ->
-                            if (throwable is CancellationException) throw throwable
-                            _uiState.update { it.copy(hasError = true) }
-                        }
-                } finally {
-                    _uiState.update { it.copy(isRefreshing = false) }
-                }
+    fun onRefreshClick() {
+        if (_uiState.value.isRefreshing) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRefreshing = true) }
+            try {
+                runCatching { refreshResearchSignalsUseCase() }
+                    .onFailure { throwable ->
+                        if (throwable is CancellationException) throw throwable
+                        _uiState.update { it.copy(hasError = true) }
+                    }
+            } finally {
+                _uiState.update { it.copy(isRefreshing = false) }
             }
         }
-
-        fun onRetryClick() {
-            _uiState.update { it.copy(hasError = false, isLoading = true) }
-            observeHomeData()
-            onRefreshClick()
-        }
-
-        private fun observeHomeData() {
-            observeJob?.cancel()
-            observeJob =
-                combine(getHomeSummaryUseCase(), getResearchSignalsUseCase()) { summary, signals -> summary to signals }
-                    .onEach { (summary, signals) ->
-                        _uiState.update { it.copy(summary = summary, signals = signals, isLoading = false) }
-                    }
-                    .catch {
-                        _uiState.update { it.copy(isLoading = false, hasError = true) }
-                    }
-                    .launchIn(viewModelScope)
-        }
     }
+
+    fun onRetryClick() {
+        _uiState.update { it.copy(hasError = false, isLoading = true) }
+        observeHomeData()
+        onRefreshClick()
+    }
+
+    private fun observeHomeData() {
+        observeJob?.cancel()
+        observeJob =
+            combine(getHomeSummaryUseCase(), getResearchSignalsUseCase()) { summary, signals -> summary to signals }
+                .onEach { (summary, signals) ->
+                    _uiState.update { it.copy(summary = summary, signals = signals, isLoading = false) }
+                }
+                .catch {
+                    _uiState.update { it.copy(isLoading = false, hasError = true) }
+                }
+                .launchIn(viewModelScope)
+    }
+}

@@ -20,19 +20,18 @@ class GetHomeSummaryUseCaseTest {
     }
 
     @Test
-    fun `invoke 返回 repository 里的汇总数据`() =
-        runTest {
-            val summary =
-                DailySummary(
-                    scannedNewsCount = 10,
-                    mergedEventCount = 5,
-                    effectiveEventCount = 2,
-                    coreCandidateCount = 1,
-                )
-            val useCase = GetHomeSummaryUseCase(FakeResearchSignalRepository(summary))
+    fun `invoke 返回 repository 里的汇总数据`() = runTest {
+        val summary =
+            DailySummary(
+                scannedNewsCount = 10,
+                mergedEventCount = 5,
+                effectiveEventCount = 2,
+                coreCandidateCount = 1,
+            )
+        val useCase = GetHomeSummaryUseCase(FakeResearchSignalRepository(summary))
 
-            val result = useCase().first()
+        val result = useCase().first()
 
-            assertThat(result).isEqualTo(summary)
-        }
+        assertThat(result).isEqualTo(summary)
+    }
 }

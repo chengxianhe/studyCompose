@@ -30,10 +30,7 @@ import com.study.cc.domain.model.ResearchSignal
 import java.util.Locale
 
 @Composable
-fun HomeRoute(
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
-) {
+fun HomeRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     HomeScreen(
         uiState = uiState,
@@ -72,11 +69,11 @@ private fun HomeTopBar(isRefreshing: Boolean, onRefreshClick: () -> Unit) {
             TextButton(onClick = onRefreshClick) {
                 Text(
                     text =
-                        if (isRefreshing) {
-                            stringResource(R.string.home_refreshing_label)
-                        } else {
-                            stringResource(R.string.home_refresh_action)
-                        },
+                    if (isRefreshing) {
+                        stringResource(R.string.home_refreshing_label)
+                    } else {
+                        stringResource(R.string.home_refresh_action)
+                    },
                 )
             }
         },
@@ -84,11 +81,7 @@ private fun HomeTopBar(isRefreshing: Boolean, onRefreshClick: () -> Unit) {
 }
 
 @Composable
-private fun HomeContent(
-    uiState: HomeUiState,
-    onRetryClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun HomeContent(uiState: HomeUiState, onRetryClick: () -> Unit, modifier: Modifier = Modifier) {
     when {
         uiState.isLoading -> LoadingState(modifier = modifier)
         uiState.hasError ->

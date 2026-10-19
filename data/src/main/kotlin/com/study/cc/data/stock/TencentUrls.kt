@@ -16,10 +16,9 @@ internal object TencentUrls {
         .addEncodedQueryParameter("param", "${symbol(security)},day,,,$limit,qfq")
         .build().toString()
 
-    fun search(query: String): String =
-        SEARCH_BASE.toHttpUrl().newBuilder()
-            .addQueryParameter("q", query).addQueryParameter("t", "all")
-            .build().toString()
+    fun search(query: String): String = SEARCH_BASE.toHttpUrl().newBuilder()
+        .addQueryParameter("q", query).addQueryParameter("t", "all")
+        .build().toString()
 
     fun symbol(security: SecurityId): String = (if (security.market == Market.SSE) "sh" else "sz") + security.code
 }

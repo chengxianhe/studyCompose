@@ -12,15 +12,14 @@ import org.junit.Test
 
 class GetResearchSignalsUseCaseTest {
     private class FakeResearchSignalRepository(private val signals: List<ResearchSignal>) : ResearchSignalRepository {
-        override fun observeDailySummary(): Flow<DailySummary> =
-            flowOf(
-                DailySummary(
-                    scannedNewsCount = 0,
-                    mergedEventCount = 0,
-                    effectiveEventCount = 0,
-                    coreCandidateCount = 0,
-                ),
-            )
+        override fun observeDailySummary(): Flow<DailySummary> = flowOf(
+            DailySummary(
+                scannedNewsCount = 0,
+                mergedEventCount = 0,
+                effectiveEventCount = 0,
+                coreCandidateCount = 0,
+            ),
+        )
 
         override fun observeSignals(): Flow<List<ResearchSignal>> = flowOf(signals)
 
@@ -28,27 +27,26 @@ class GetResearchSignalsUseCaseTest {
     }
 
     @Test
-    fun `invoke 返回 repository 里的信号列表`() =
-        runTest {
-            val signals =
-                listOf(
-                    ResearchSignal(
-                        id = "evt-600001",
-                        stockCode = "600001",
-                        stockName = "t",
-                        eventTitle = "e",
-                        eventScore = 80,
-                        businessRelevancePercent = 90,
-                        recentPriceChangePercent = 1.0,
-                        sectorPriceChangePercent = 2.0,
-                        historicalSimilarEventCount = 3,
-                        historicalPositiveReturnRatioPercent = 60.0,
-                    ),
-                )
-            val useCase = GetResearchSignalsUseCase(FakeResearchSignalRepository(signals))
+    fun `invoke 返回 repository 里的信号列表`() = runTest {
+        val signals =
+            listOf(
+                ResearchSignal(
+                    id = "evt-600001",
+                    stockCode = "600001",
+                    stockName = "t",
+                    eventTitle = "e",
+                    eventScore = 80,
+                    businessRelevancePercent = 90,
+                    recentPriceChangePercent = 1.0,
+                    sectorPriceChangePercent = 2.0,
+                    historicalSimilarEventCount = 3,
+                    historicalPositiveReturnRatioPercent = 60.0,
+                ),
+            )
+        val useCase = GetResearchSignalsUseCase(FakeResearchSignalRepository(signals))
 
-            val result = useCase().first()
+        val result = useCase().first()
 
-            assertThat(result).isEqualTo(signals)
-        }
+        assertThat(result).isEqualTo(signals)
+    }
 }
