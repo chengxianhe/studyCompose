@@ -8,9 +8,14 @@ plugins {
 
 android {
     namespace = "com.study.cc.data"
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":domain"))
     implementation(project(":core:common"))
     implementation(project(":core:logging"))

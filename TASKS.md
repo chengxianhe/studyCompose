@@ -1,13 +1,89 @@
 ## 当前任务
-- [ ] T-004 <一句话，从下面两个方向选一个：接真后端 / 做事件详情页>
-      规格：specs/xxx.md
-      验收：<具体到可验证>
-      范围：<只允许改哪些目录>
-      不做：<明确排除>
+（当前无进行中的任务；下一条：见「待办」T-005）
 
 ## 待办
+- [ ] T-005 软门禁清零：更新 dependencyGuard 依赖基线、统一 spotless 格式，
+      并把这两项纳入自检清单（T-004 提交完成后再做）
+      规格：2026-10-19 验收 T-004 时核实——`./gradlew :app:dependencyGuard`
+      失败，差异仅为 `hilt-navigation-compose` 带入的 9 项（T-002/T-003
+      提交 e34ec0f 引入后未更新基线）；`./gradlew spotlessCheck` 对
+      domain/data/feature:home 里一批文件失败（含 T-002/T-003 已提交的旧
+      文件，不只是 T-004 新文件）。这两项不在 CLAUDE.md 自检清单里，所以
+      之前"自检全绿"并不覆盖它们
+      发现（T-004 验收时）：spotless 的 ktlint 没有配置行宽上限，会把
+      `fun x(...): T =` 与后面的表达式并成一行；detekt 的 MaxLineLength 是 120。
+      已提交的旧代码折行写法满足 detekt、违反 spotless——两个门禁互相矛盾。
+      所以 `spotlessApply` 之前必须先对齐：在 spotless 的 ktlint 配置里设
+      `max_line_length=120`（只是让 ktlint 与 detekt 一致，不放宽任何检查），
+      否则格式化会让 detekt 变红。当前 spotless 违规共 12 个文件：T-004 的 5 个
+      （见 T-004「遗留」）+ 已提交旧文件 7 个（ResearchSignalUseCaseModule、
+      HomeScreen、HomeViewModel、GetHomeSummaryUseCaseTest、
+      GetResearchSignalsUseCaseTest、RefreshResearchSignalsUseCaseTest、
+      HomeViewModelTest）
+      验收：分两个独立提交——
+      ① 依赖基线：确认差异全部是有意引入后，运行
+      `./gradlew :app:dependencyGuardBaseline`，提交只含
+      `app/dependencies/releaseRuntimeClasspath.txt`，提交信息列出新增的库；
+      ② 格式统一：运行 `spotlessApply`，提交只含格式变化，不夹带任何逻辑
+      改动（用 `git diff -w` 抽查；格式化后 `./gradlew :konsistTest:test
+      detekt lint test` 仍全绿）；
+      两个提交之后 `./gradlew dependencyGuard spotlessCheck` 全绿
+      后续：把 `dependencyGuard`、`spotlessCheck` 加进 CLAUDE.md 自检清单——
+      这是修改项目约定，等用户确认后单独提交，不并入上面两个
+      范围：`app/dependencies/`、spotless 报告里列出的源文件
+      不做：不改 detekt/Konsist/lint 配置；不借格式化顺手重构；基线只在
+      逐项确认差异是有意引入后才更新，不为变绿而盲目刷新
+      前置：T-004 先提交，避免格式化与 T-004 未提交文件互相踩；T-004 里
+      有意引入的 `desugar_jdk_libs` 是 `coreLibraryDesugaring` 配置，预计不
+      影响 `releaseRuntimeClasspath`，该任务开始时实际验证
 
 ## 已完成
+- [x] T-004 A股行情数据 V1（2026-10-19）：在 `:data` 用腾讯财经接口取"证券搜索 / 单股报价 /
+      日K线"三项（只做数据层，无 UI）
+      规格：`~/Downloads/stock-data-api-development-guide.md` §3、§8.1、§10
+      + 本次会话 2026-10-19 对腾讯三个接口的实测样本（文档自称未实测，
+      腾讯报价/日K/搜索的字段顺序与单位已用真实响应核对，见下）
+      实测结论（写进解析器和测试的依据）：报价 `qt.gtimg.cn` 为 GBK 文本、
+      `~` 分隔、`[3]`现价 `[4]`昨收 `[5]`开 `[30]`时间 `[33]`高 `[34]`低；
+      日K `newfqkline` 为 JSON，行顺序 日期/开/收/高/低/量(手)/`{}`/换手率/
+      成交额(万元)，第 7 个元素是空对象（数组混合类型）；搜索 `smartbox`
+      返回 `\uXXXX` 转义字符串；不带浏览器 User-Agent 也可访问
+      验收：`./gradlew :konsistTest:test detekt lint test` 全绿；
+      `:app:assembleDebug` 编译通过；解析器单元测试用保存的真实响应做
+      fixture（报价 fixture 保留 GBK 原始字节），覆盖：正常解析、数组混合
+      类型、搜索 unicode 转义、空响应/字段缺失/格式错位 → 明确报
+      SchemaChanged 而不是静默错位；UseCase 与 Repository 映射有测试；
+      报价带 `source`/`sourceTime`/`fetchedAt`；日K带 `source`/`fetchedAt`，
+      数据时间以末根K线日期为准（K线接口本身没有独立时间戳）；量单位固定为"手"、
+      金额单位固定为"元"并在命名中体现；日志走 `core:logging`
+      范围：`domain/` `data/`，外加 `TASKS.md`、`docs/patterns/README.md`
+      （完成后补一行"第三方非 JSON 数据源适配器"真实样板路径）
+      不做：UI/首页接线；东方财富/新浪/同花顺（同花顺文档里没有接口信息）；
+      分钟线/分时；多源降级、缓存、限流退避；`stale` 判定（需要交易日历）；
+      北交所/ETF/指数的单位与复权核验（只验证了沪深个股）；自家后端；
+      应用内联网冒烟测试；数据源授权与合规评估——这些是非官方前端接口，
+      对外发布前必须换成有授权的数据源（承接 T-003 登记的合规风险）
+      完成情况：Codex 实现，Claude 验收（准入门禁 → 自己强制全量重跑 → 对抗
+      验证 → 跨源对照 → Codex 只读独立复审，复审 10 条逐条核实，成立的全部
+      修复）。证据：`./gradlew :konsistTest:test detekt lint test
+      :app:assembleDebug --rerun-tasks` 533/533 任务实际执行并成功；测试
+      domain 10、data 29（debug/release 各）、Konsist 21、home 5，失败 0；
+      24 个故意植入的 bug 全部被测试抓住；3 只股票×近 10 个交易日与东方财富
+      跨源对照 33 项一致（报价成交额为整数元，容差 <1 元）；合并后的 manifest
+      含 `android.permission.INTERNET`；dependencyGuard 差异仅为 T-002 遗留
+      的 9 行，T-004 未新增任何一行
+      用户决定：接受核心库脱糖（minSdk 24 使用 `java.time` 所需），版本放进
+      `gradle/libs.versions.toml`（`desugar-jdk-libs`），`app`/`data` 启用
+      实现要点：INTERNET 声明在 `data` 库 manifest（由 manifest 合并带入
+      app）；K 线回退到 `day` 键时标 `Adjustment.UNKNOWN` 而非 QFQ；搜索只
+      保留 `GP-A*`（B 股 `GP-B` 被排除，科创板 `GP-A-KCB` 保留）；
+      `SecurityId` 要求 6 位数字；成功与失败都记日志（不含搜索词和响应体）
+      已知未验证：应用内真机联网（没有 UI 接线）；ETF/指数/北交所；除权日前后、
+      停牌、涨跌停日；上游频率限制；同花顺；数据源授权与合规（对外发布前必须
+      换成有授权的数据源）
+      遗留：`StockUseCaseModule`、`TencentUrls`、`StockDataException`、
+      `GetDailyBarsUseCase`、`StockFixtures` 共 5 个文件为满足 detekt 的 120
+      列上限而折行，与 spotless 的 ktlint（无行宽上限）冲突，留给 T-005
 - [x] T-003a T-003 的 Codex 交叉审查修复（2026-10-19）
       规格：Codex 只读审查报告（本次会话），逐条对照代码核实后修复
       验收：`./gradlew :konsistTest:test detekt lint test` 全绿（含 3 个

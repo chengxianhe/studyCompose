@@ -9,6 +9,10 @@ plugins {
 android {
     namespace = "com.study.cc"
 
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+
     defaultConfig {
         applicationId = "com.study.cc"
         versionCode = 1
@@ -29,6 +33,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":core:common"))
