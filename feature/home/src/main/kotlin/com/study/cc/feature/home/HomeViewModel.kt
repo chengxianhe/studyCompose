@@ -2,17 +2,17 @@ package com.study.cc.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.study.cc.core.logging.Logger
+import com.study.cc.domain.model.Quote
 import com.study.cc.domain.model.ResearchSignal
+import com.study.cc.domain.model.StockDataException
 import com.study.cc.domain.usecase.GetHomeSummaryUseCase
-import com.study.cc.domain.usecase.GetQuoteUseCase
 import com.study.cc.domain.usecase.GetResearchSignalsUseCase
+import com.study.cc.domain.usecase.GetSignalQuoteUseCase
 import com.study.cc.domain.usecase.RefreshResearchSignalsUseCase
-import com.study.cc.domain.usecase.ResolveSecurityIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val TAG = "HomeViewModel"
+
 @HiltViewModel
 class HomeViewModel
 @Inject
@@ -32,8 +34,8 @@ constructor(
     private val getHomeSummaryUseCase: GetHomeSummaryUseCase,
     private val getResearchSignalsUseCase: GetResearchSignalsUseCase,
     private val refreshResearchSignalsUseCase: RefreshResearchSignalsUseCase,
-    private val getQuoteUseCase: GetQuoteUseCase,
-    private val resolveSecurityIdUseCase: ResolveSecurityIdUseCase,
+    private val getSignalQuoteUseCase: GetSignalQuoteUseCase,
+    private val logger: Logger,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -47,7 +49,9 @@ constructor(
         observeHomeData()
     }
 
-    fun onRefreshClick() {
+    fun onRefreshClick() = refresh(reloadQuotes = true)
+
+    private fun refresh(reloadQuotes: Boolean) {
         if (_uiState.value.isRefreshing) return
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
@@ -55,7 +59,11 @@ constructor(
             try {
                 runCatching { refreshResearchSignalsUseCase() }
                     .onSuccess {
-                        if (quoteLoadVersion == previousQuoteLoadVersion) loadQuotes(_uiState.value.signals)
+                        if (reloadQuotes &&
+                            quoteLoadVersion == previousQuoteLoadVersion
+                        ) {
+                            loadQuotes(_uiState.value.signals)
+                        }
                     }
                     .onFailure { throwable ->
                         if (throwable is CancellationException) throw throwable
@@ -72,7 +80,7 @@ constructor(
         _uiState.update { it.copy(quotes = emptyMap()) }
         _uiState.update { it.copy(hasError = false, isLoading = true) }
         observeHomeData()
-        onRefreshClick()
+        refresh(reloadQuotes = false)
     }
 
     private fun observeHomeData() {
@@ -97,21 +105,26 @@ constructor(
     private fun loadQuotes(signals: List<ResearchSignal>) {
         quoteJob?.cancel()
         val version = ++quoteLoadVersion
+        val ids = signals.map(ResearchSignal::id).toSet()
+        _uiState.update { state -> state.copy(quotes = state.quotes.filterKeys { it in ids }) }
         quoteJob =
             viewModelScope.launch {
-                val quotes =
-                    coroutineScope {
-                        signals.map { signal ->
-                            async {
-                                val security = resolveSecurityIdUseCase(signal.stockCode) ?: return@async null
-                                runCatching { getQuoteUseCase(security) }
-                                    .onFailure { throwable ->
-                                        if (throwable is CancellationException) throw throwable
-                                    }.getOrNull()?.let { signal.id to it }
-                            }
-                        }.awaitAll().filterNotNull().toMap()
-                    }
-                if (version == quoteLoadVersion) _uiState.update { it.copy(quotes = quotes) }
+                coroutineScope {
+                    signals.forEach { signal -> launch { loadQuote(signal, version) } }
+                }
             }
     }
+
+    private suspend fun loadQuote(signal: ResearchSignal, version: Long) {
+        val quote =
+            runCatching { getSignalQuoteUseCase(signal) }
+                .onFailure { throwable ->
+                    if (throwable is CancellationException) throw throwable
+                    if (throwable !is StockDataException) logger.w(TAG, "Quote load failed", throwable)
+                }.getOrNull()
+        _uiState.update { state -> if (version == quoteLoadVersion) state.withQuote(signal.id, quote) else state }
+    }
 }
+
+private fun HomeUiState.withQuote(id: String, quote: Quote?): HomeUiState =
+    copy(quotes = if (quote == null) quotes - id else quotes + (id to quote))

@@ -8,6 +8,7 @@ import com.study.cc.domain.repository.ResearchSignalRepository
 import com.study.cc.domain.usecase.GetHomeSummaryUseCase
 import com.study.cc.domain.usecase.GetQuoteUseCase
 import com.study.cc.domain.usecase.GetResearchSignalsUseCase
+import com.study.cc.domain.usecase.GetSignalQuoteUseCase
 import com.study.cc.domain.usecase.RefreshResearchSignalsUseCase
 import com.study.cc.domain.usecase.ResolveSecurityIdUseCase
 import kotlinx.coroutines.CompletableDeferred
@@ -169,7 +170,14 @@ class HomeViewModelTest {
         getHomeSummaryUseCase = GetHomeSummaryUseCase(repository),
         getResearchSignalsUseCase = GetResearchSignalsUseCase(repository),
         refreshResearchSignalsUseCase = RefreshResearchSignalsUseCase(repository),
-        getQuoteUseCase = GetQuoteUseCase(FakeQuoteRepository { error("No quote") }),
-        resolveSecurityIdUseCase = ResolveSecurityIdUseCase(),
+        getSignalQuoteUseCase = GetSignalQuoteUseCase(
+            ResolveSecurityIdUseCase(),
+            GetQuoteUseCase(
+                FakeQuoteRepository {
+                    error("No quote")
+                },
+            ),
+        ),
+        logger = NoOpLogger,
     )
 }

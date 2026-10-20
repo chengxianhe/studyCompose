@@ -131,7 +131,15 @@ private fun HomeSignalList(
                 )
             }
         }
-        items(signals, key = ResearchSignal::id) { signal -> SignalCard(signal, quotes[signal.id]) }
+        items(signals, key = ResearchSignal::id) { signal ->
+            SignalCard(
+                signal,
+                quotes[signal.id]?.takeIf {
+                    it.security.code ==
+                        signal.stockCode
+                },
+            )
+        }
     }
 }
 
