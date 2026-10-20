@@ -1,5 +1,26 @@
 ## 当前任务
-（当前无进行中的任务；「待办」也已清空，下一条等用户定义）
+- [ ] T-006 首页信号卡片带实时报价（2026-10-20）
+      范围：每张 ResearchSignal 卡片显示现价与今日涨跌幅（带正负号的数字，**不上色**）。
+      不改 `:data`（除 StockUseCaseModule 增加一个 @Provides）；不动
+      InMemoryResearchSignalRepository 的占位数据；不新增设计系统 token / 组件。
+      规格：
+      ① `:domain` 新建 `ResolveSecurityIdUseCase`（仅一个 public fun，输入 6 位 stockCode
+        字符串，输出 `SecurityId?`）：6 开头→SSE，0/3 开头→SZSE，其余（含北交所 4/8/9、
+        非 6 位数字、空串）→null。带单元测试覆盖上述全部分支。
+      ② `StockUseCaseModule` 增加对应 @Provides。
+      ③ `HomeUiState` 增加 `quotes: Map<String, Quote> = emptyMap()`，key 为 signal.id。
+      ④ `HomeViewModel` 注入 GetQuoteUseCase、ResolveSecurityIdUseCase；信号列表到达后并发
+        为每个信号取一次报价，单个失败（任何非 CancellationException 异常）只是 Map 里缺这一项，
+        不改 hasError；CancellationException 必须重新抛出；`onRefreshClick`/`onRetryClick`
+        之后重新取报价；新一轮取报价要取消上一轮未完成的（不得串用过期结果）。
+      ⑤ `HomeScreen` 的 SignalCard 在有报价时多显示一行（现价 + 带正负号涨跌幅），无报价
+        时与现在完全一致。文案进 strings.xml，无内联视觉数值。
+      ⑥ 测试：全部成功、部分失败、全部失败、不可解析代码（北交所）、刷新后报价重取、
+        取消不被吞。
+      验收：`./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard
+      :app:assembleDebug` 全绿（--rerun-tasks）；不得修改 Konsist/detekt/lint 配置；
+      不得新增 @Suppress。
+      已知局限：占位信号代码为 600001/600002，真机上多半走"无行情"路径；本任务无真机联网验证。
 
 ## 待办
 （暂无）
