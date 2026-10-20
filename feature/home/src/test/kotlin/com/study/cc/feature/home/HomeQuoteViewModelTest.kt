@@ -119,6 +119,24 @@ class HomeQuoteViewModelTest {
     }
 
     @Test
+    fun refreshKeepsPreviousQuoteVisibleUntilNewOneArrives() = runTest {
+        var calls = 0
+        val gate = CompletableDeferred<Unit>()
+        val viewModel = viewModel(SignalRepository(listOf(firstSignal))) { security ->
+            calls++
+            if (calls > 1) gate.await()
+            quote(security, calls.toDouble())
+        }
+        assertThat(viewModel.uiState.value.quotes["first"]?.price).isEqualTo(1.0)
+
+        viewModel.onRefreshClick()
+
+        assertThat(viewModel.uiState.value.quotes["first"]?.price).isEqualTo(1.0)
+        gate.complete(Unit)
+        assertThat(viewModel.uiState.value.quotes["first"]?.price).isEqualTo(2.0)
+    }
+
+    @Test
     fun summaryChangeDoesNotReloadUnchangedSignals() = runTest {
         var calls = 0
         val repository = SignalRepository(listOf(firstSignal))

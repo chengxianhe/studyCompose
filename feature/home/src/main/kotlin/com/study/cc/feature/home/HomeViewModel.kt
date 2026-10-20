@@ -97,7 +97,6 @@ constructor(
     private fun loadQuotes(signals: List<ResearchSignal>) {
         quoteJob?.cancel()
         val version = ++quoteLoadVersion
-        _uiState.update { it.copy(quotes = emptyMap()) }
         quoteJob =
             viewModelScope.launch {
                 val quotes =
