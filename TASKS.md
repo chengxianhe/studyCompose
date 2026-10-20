@@ -1,5 +1,11 @@
 ## 当前任务
-- [ ] T-006 首页信号卡片带实时报价（2026-10-20）
+（当前无进行中的任务；下一条等用户定义）
+
+## 待办
+（暂无）
+
+## 已完成
+- [x] T-006 首页信号卡片带实时报价（2026-10-20）
       范围：每张 ResearchSignal 卡片显示现价与今日涨跌幅（带正负号的数字，**不上色**）。
       不改 `:data`（除 StockUseCaseModule 增加一个 @Provides）；不动
       InMemoryResearchSignalRepository 的占位数据；不新增设计系统 token / 组件。
@@ -21,11 +27,13 @@
       :app:assembleDebug` 全绿（--rerun-tasks）；不得修改 Konsist/detekt/lint 配置；
       不得新增 @Suppress。
       已知局限：占位信号代码为 600001/600002，真机上多半走"无行情"路径；本任务无真机联网验证。
+      验收证据（2026-10-20）：--rerun-tasks 全量自检含 assembleDebug 全绿，测试 79 个 0 失败；
+      11 个变异体 9 个被杀，2 个存活（均为冗余防御：最终写入前的 version 校验、
+      onRetryClick 里多余的 quoteJob.cancel，上游已有取消保证，行为等价）
+      遗留：①每次重新取报价会先清空 quotes，刷新时行情行会闪一下消失再出现；
+      ②未做 Codex 只读复审；③无真机联网验证，占位代码 600001/600002 多半走无行情路径；
+      ④涨跌幅未上色（项目暂无涨跌色 token）
 
-## 待办
-（暂无）
-
-## 已完成
 - [x] T-005 软门禁清零：更新 dependencyGuard 依赖基线、统一 spotless 格式，
       并把这两项纳入自检清单（2026-10-19）
       规格：2026-10-19 验收 T-004 时核实——`./gradlew :app:dependencyGuard`

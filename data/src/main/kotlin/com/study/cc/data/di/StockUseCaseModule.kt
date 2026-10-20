@@ -3,6 +3,7 @@ package com.study.cc.data.di
 import com.study.cc.domain.repository.StockMarketRepository
 import com.study.cc.domain.usecase.GetDailyBarsUseCase
 import com.study.cc.domain.usecase.GetQuoteUseCase
+import com.study.cc.domain.usecase.ResolveSecurityIdUseCase
 import com.study.cc.domain.usecase.SearchSecuritiesUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,6 +19,9 @@ internal object StockUseCaseModule {
 
     @Provides
     fun provideGetQuoteUseCase(repository: StockMarketRepository): GetQuoteUseCase = GetQuoteUseCase(repository)
+
+    @Provides
+    fun provideResolveSecurityIdUseCase(): ResolveSecurityIdUseCase = ResolveSecurityIdUseCase()
 
     @Provides
     fun provideGetDailyBarsUseCase(repository: StockMarketRepository): GetDailyBarsUseCase =

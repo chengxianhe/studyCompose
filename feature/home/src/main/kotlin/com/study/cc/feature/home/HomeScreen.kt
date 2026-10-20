@@ -26,6 +26,7 @@ import com.study.cc.core.ui.state.EmptyState
 import com.study.cc.core.ui.state.ErrorState
 import com.study.cc.core.ui.state.LoadingState
 import com.study.cc.domain.model.DailySummary
+import com.study.cc.domain.model.Quote
 import com.study.cc.domain.model.ResearchSignal
 import java.util.Locale
 
@@ -96,12 +97,23 @@ private fun HomeContent(uiState: HomeUiState, onRetryClick: () -> Unit, modifier
                 message = stringResource(R.string.home_empty_message),
                 modifier = modifier,
             )
-        else -> HomeSignalList(summary = uiState.summary, signals = uiState.signals, modifier = modifier)
+        else ->
+            HomeSignalList(
+                summary = uiState.summary,
+                signals = uiState.signals,
+                quotes = uiState.quotes,
+                modifier = modifier,
+            )
     }
 }
 
 @Composable
-private fun HomeSignalList(summary: DailySummary?, signals: List<ResearchSignal>, modifier: Modifier = Modifier) {
+private fun HomeSignalList(
+    summary: DailySummary?,
+    signals: List<ResearchSignal>,
+    quotes: Map<String, Quote>,
+    modifier: Modifier = Modifier,
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(Spacing.lg),
@@ -119,7 +131,7 @@ private fun HomeSignalList(summary: DailySummary?, signals: List<ResearchSignal>
                 )
             }
         }
-        items(signals, key = ResearchSignal::id) { signal -> SignalCard(signal) }
+        items(signals, key = ResearchSignal::id) { signal -> SignalCard(signal, quotes[signal.id]) }
     }
 }
 
@@ -146,7 +158,7 @@ private fun SummaryStat(value: Int, label: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun SignalCard(signal: ResearchSignal, modifier: Modifier = Modifier) {
+private fun SignalCard(signal: ResearchSignal, quote: Quote?, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = signal.eventScore.toString(), style = MaterialTheme.typography.titleLarge)
@@ -154,6 +166,18 @@ private fun SignalCard(signal: ResearchSignal, modifier: Modifier = Modifier) {
         }
         Text(text = signal.eventTitle, style = MaterialTheme.typography.bodyMedium)
         SignalMetricsRow(signal)
+        if (quote != null) {
+            Text(
+                text =
+                stringResource(
+                    R.string.home_signal_quote,
+                    String.format(Locale.US, "%.2f", quote.price),
+                    formatSignedPercent(quote.changePercent),
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

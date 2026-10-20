@@ -15,4 +15,5 @@
     <string name="home_signal_sector_change">板块同期 %1$s</string>
     <string name="home_signal_history">历史类似事件 %1$d 次</string>
     <string name="home_signal_positive_ratio">20日正收益占比 %1$s%%</string>
+    <string name="home_signal_quote">现价 %1$s · 今日涨跌幅 %2$s</string>
 </resources>
