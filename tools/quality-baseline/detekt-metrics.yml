@@ -1,0 +1,12 @@
+# 仅用于 tools/quality-baseline/measure.py 度量代码质量基线，不参与 CI，也不替代 config/detekt/detekt.yml。
+# 阈值压到 1，让每个函数都出现在报告里；其余规则由 measure.py 按 rule id 过滤掉。
+build:
+  maxIssues: -1
+
+complexity:
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 1
+  LongMethod:
+    active: true
+    threshold: 1
