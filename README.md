@@ -1,6 +1,11 @@
 # studyCompose
 
-一个 Jetpack Compose 多模块 Android 工程脚手架，外加一个独立的
+中文 | [English](README.en.md)
+
+一个关于「让 AI 辅助的 Android 开发始终受架构约束」的个人参考项目：架构规则用机器断言
+（Konsist、detekt、lint、Dependency Guard）强制执行，而不是只写在文档里。
+
+具体是一个 Jetpack Compose 多模块 Android 工程脚手架，外加一个独立的
 「受治理 AI 知识平台」原型（`platform/`）。两部分完全隔离，`platform/`
 不进 Gradle 构建，Android 那边的架构规则也不约束 `platform/`。
 
