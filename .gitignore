@@ -28,3 +28,6 @@ htmlcov/
 
 # platform/ runtime data — never commit the local knowledge db
 platform/.data/
+
+# Claude 自检成功戳记（仅本地缓存）
+.claude/.self-check-passed
