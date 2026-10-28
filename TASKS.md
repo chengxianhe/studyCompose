@@ -11,6 +11,11 @@
 
 新任务完成后先记在这里；本文件接近 250 行时，再把较早的条目搬进上面的归档文件。
 
+- [x] T-010 移除股票相关代码（2026-10-28）
+      范围：产品转向图片类，删除 domain/data 中全部股票（行情、事件雷达、代码校验）代码与测试、
+      `feature:stocklookup`、`docs/signal-rule-acceptance-draft.md`；`feature:home` 保留为占位页。
+      保留：`AppTextField`、`data` 的网络依赖（build.gradle 未动）、`platform/`、历史任务归档。
+      patterns 索引三行（UseCase / 简单 Repository / 表单校验）改回「待补」。
 - [x] T-009 补 patterns「表单校验」样板（2026-10-28）
       范围：只做表单校验一行，载体是已有的 `ResolveSecurityIdUseCase`（股票代码输入）；不碰离线优先 / 分页。
       产出：`ValidateStockCodeUseCase`（+单测）、`StockCodeValidationModule`、`AppTextField`、
