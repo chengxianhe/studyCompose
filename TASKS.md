@@ -29,7 +29,7 @@
 - 实体不含 Android 类型（Uri 用 `String`/id 表示）；一次性事件走 `UiState` 字段。
 - 位置等 EXIF 敏感信息不进日志；列表里不读 EXIF，只在详情页按需读。
 - 性能预算（T-011 实测后修订，数字见 `docs/metrics/photo-baseline-2026-10-28.md`，限于华为 CLS-AL30 一台设备）：
-  100 万条下冷启动到首屏内容 ≤ 2 s（实测中位数 0.87 s，但有未解释的离群值）、内存峰值与总量基本无关（匿名 RSS 约 76 MB）、
+  100 万条下冷启动到首屏内容 ≤ 2 s（实测中位数 1.03 s）、内存峰值与总量基本无关（匿名 RSS 约 76 MB）、
   网格滚动无明显掉帧（帧 CPU P99 约 5.5 ms）、同步未完成时可先展示已有部分；年 / 月 / 日摘要不得在首屏路径上同步全量聚合。
 - 新增依赖（Room、Coil 等）随引入它的任务一起提交，提交信息列出新增的库并按流程刷新 dependencyGuard 基线。
 - 设计系统缺 token（缩略图间距、日期头、网格圆角等）时停下来问，不内联、不借用。
@@ -50,7 +50,7 @@
       验收：100 万条全量同步耗时与内存记入基线；批量增删下增量同步正确；部分授权时界面提示数据不完整；
       自检命令全绿。
       依赖：T-011。patterns「离线优先 Repository」行在本任务补真实样板；完成后用真实 schema 重跑 T-011 基线，
-      并查清首屏内容时间的离群值；摘要（年 / 月 / 日数量与封面）持久化并增量维护。
+      摘要（年 / 月 / 日数量与封面）持久化并增量维护。
 - [ ] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈
       范围：`app` 模块内的底部导航与路由；4 个 Tab 先挂占位页；feature 只暴露 Route 与回调。
       使用 Navigation 3（alpha，见已确认第 4 条）。
@@ -106,9 +106,9 @@
 - [x] T-011 压测基础设施与性能预算（2026-10-28，带已知缺口）
       范围：`:benchmark-target`（合成数据 + 原型 Room schema + 占位网格）、`:benchmark`（Macrobenchmark 五组度量）、
       `studycompose.android.test` 约定插件、`benchmark/README.md`、`docs/metrics/photo-baseline-2026-10-28.md`。
-      结果（华为 CLS-AL30，100 万条）：首屏内容中位数 0.87 s、占位网格滚动帧 CPU P50 2.1 ms / P99 5.5 ms、
+      结果（华为 CLS-AL30，100 万条）：首屏内容中位数 1.03 s、占位网格滚动帧 CPU P50 2.1 ms / P99 5.5 ms、
       匿名 RSS 峰值 76 MB、首次灌入 23.0 s；年汇总 0.55 s、日桶列表 0.33 s，需持久化摘要，不能每次启动同步算。
-      已知缺口：首屏内容时间有未解释的离群值（最大 24.9 s）；冷启动测试在不同档位随机失败过；
+      已知缺口：冷启动测试曾在不同档位随机失败（修复后一次完整运行三档通过）；内存 / 查询 / 滚动未在修复后重跑；
       只测了一台设备，且是合成数据 / 占位格；原型 schema 不是 T-012 最终 schema，T-012 须重跑。
       验收证据：`./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard` 退出码 0，
       `:app:dependencyGuard` 基线未变；设备上的 Macrobenchmark 不在标准自检命令内，结果见基线文档。

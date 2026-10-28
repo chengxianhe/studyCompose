@@ -81,7 +81,10 @@ private fun runMode(context: Context, mode: BenchMode, scale: Int): Outcome = ru
 }.getOrElse { Outcome.Status(R.string.bench_status_error) }
 
 private fun ensureSeeded(database: BenchmarkDatabase, config: GeneratorConfig) {
-    if (database.photoMetaDao().count() == config.total) return
+    val existing = database.photoMetaDao().count()
+    // 排查「首次迭代重新灌库」：把启动时库里的行数写进 trace 段名，事后可在 Perfetto 里查
+    traced("bench.existingRows=$existing/${config.total}") { }
+    if (existing == config.total) return
     // 上次灌到一半被系统杀掉会留下残缺的库，必须先清空，否则再灌一遍行数永远对不上
     database.clearAllTables()
     traced(TraceNames.SEED) { PhotoSeeder(database).seed(config) }

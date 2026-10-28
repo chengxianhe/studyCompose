@@ -28,13 +28,13 @@ class MemoryBenchmark(private val scale: Int) {
 
     @Test
     fun gridMemory() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = listOf(MemoryUsageMetric(MemoryUsageMetric.Mode.Max)),
             iterations = ITERATIONS,
             startupMode = StartupMode.COLD,
             compilationMode = CompilationMode.DEFAULT,
+            setupBlock = { BenchmarkTarget.ensureSeeded(scale) },
         ) {
             pressHome()
             startActivityAndWait { it.configure(BenchmarkTarget.MODE_GRID, scale) }
@@ -53,13 +53,13 @@ class MemoryBenchmark(private val scale: Int) {
 
     @Test
     fun longArraysMemory() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = listOf(MemoryUsageMetric(MemoryUsageMetric.Mode.Max)),
             iterations = ITERATIONS,
             startupMode = StartupMode.COLD,
             compilationMode = CompilationMode.DEFAULT,
+            setupBlock = { BenchmarkTarget.ensureSeeded(scale) },
         ) {
             pressHome()
             startActivityAndWait { it.configure(BenchmarkTarget.MODE_LONG_ARRAYS, scale) }

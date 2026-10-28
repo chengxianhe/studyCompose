@@ -24,13 +24,13 @@ class ColdStartBenchmark(private val scale: Int) {
 
     @Test
     fun coldStart() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = listOf(StartupTimingMetric()),
             iterations = ITERATIONS,
             startupMode = StartupMode.COLD,
             compilationMode = CompilationMode.DEFAULT,
+            setupBlock = { BenchmarkTarget.ensureSeeded(scale) },
         ) {
             pressHome()
             startActivityAndWait { it.configure(BenchmarkTarget.MODE_GRID, scale) }

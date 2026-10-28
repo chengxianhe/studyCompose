@@ -25,7 +25,6 @@ class ScrollBenchmark(private val scale: Int) {
 
     @Test
     fun flingDown() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = listOf(FrameTimingMetric()),

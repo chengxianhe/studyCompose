@@ -23,13 +23,13 @@ class QueryTimingBenchmark(private val scale: Int) {
 
     @Test
     fun queries() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = BenchmarkTarget.QUERY_TRACES.map { TraceSectionMetric(it) },
             iterations = ITERATIONS,
             startupMode = StartupMode.COLD,
             compilationMode = CompilationMode.DEFAULT,
+            setupBlock = { BenchmarkTarget.ensureSeeded(scale) },
         ) {
             pressHome()
             startActivityAndWait { it.configure(BenchmarkTarget.MODE_QUERIES, scale) }
@@ -39,13 +39,13 @@ class QueryTimingBenchmark(private val scale: Int) {
 
     @Test
     fun loadAllIntoLongArrays() {
-        BenchmarkTarget.ensureSeeded(scale)
         rule.measureRepeated(
             packageName = BenchmarkTarget.PACKAGE,
             metrics = listOf(TraceSectionMetric(BenchmarkTarget.TRACE_LONG_ARRAYS)),
             iterations = ITERATIONS,
             startupMode = StartupMode.COLD,
             compilationMode = CompilationMode.DEFAULT,
+            setupBlock = { BenchmarkTarget.ensureSeeded(scale) },
         ) {
             pressHome()
             startActivityAndWait { it.configure(BenchmarkTarget.MODE_LONG_ARRAYS, scale) }
