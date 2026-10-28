@@ -29,5 +29,6 @@ include(":core:logging")
 include(":core:designsystem")
 include(":core:ui")
 include(":feature:home")
+include(":feature:stocklookup")
 include(":konsistTest")
  

@@ -11,6 +11,15 @@
 
 新任务完成后先记在这里；本文件接近 250 行时，再把较早的条目搬进上面的归档文件。
 
+- [x] T-009 补 patterns「表单校验」样板（2026-10-28）
+      范围：只做表单校验一行，载体是已有的 `ResolveSecurityIdUseCase`（股票代码输入）；不碰离线优先 / 分页。
+      产出：`ValidateStockCodeUseCase`（+单测）、`StockCodeValidationModule`、`AppTextField`、
+      新模块 `:feature:stocklookup`（ViewModel/Screen/Preview/strings/单测）、patterns 索引更新。
+      未做：`:app` 不 include 该模块、不改 MainActivity（app 无导航，用户决定只接 Preview）。
+      局限：`AppTextField` 因 detekt LongParameterList（阈值 6）没有 keyboardOptions 参数，数字键盘未启用。
+      验收证据：`./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard` 退出码 0，
+      依赖未变。
+
 - [x] T-008 代码质量基线度量（2026-10-21）
       范围：用 SlopCodeBench（arXiv 2603.24755）的指标给仓库量一次基线；只度量，不改 Android 代码，
       不改 CLAUDE.md / Konsist / detekt / lint 配置，不引入依赖。

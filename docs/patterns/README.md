@@ -17,7 +17,7 @@ offline-first 的官方样板项目，本项目 build-logic 的约定插件设�
 | 简单 Repository（非离线优先） | `domain/src/main/kotlin/com/study/cc/domain/repository/ResearchSignalRepository.kt` + `data/src/main/kotlin/com/study/cc/data/repository/InMemoryResearchSignalRepository.kt` | 接口在 domain、实现在 data，Hilt `@Binds` 绑定参照 `core/logging/LoggingModule.kt` 的写法；这个例子是内存假数据源（"A股事件驱动研究雷达"后端还没做出来之前的占位），不是真离线优先同步，下面那行仍然待补 |
 | 离线优先 Repository | （待补，参照 NiA `core/data` 下 `OfflineFirstXxxRepository` + `changeListSync` 的写法；接口位置仍要按上面那条改放 domain） | |
 | 分页列表 | （待补，参照 NiA 的 Paging3 用法） | |
-| 表单校验 | （待补） | |
+| 表单校验 | `domain/.../usecase/ValidateStockCodeUseCase.kt` + `feature/stocklookup/`（`StockLookupViewModel` / `StockLookupScreen`）+ `core/designsystem/.../component/AppTextField.kt` | **NiA 没有表单校验样板，这份是按本项目 UDF 规则自拟，不是照搬**：规则放 domain UseCase，返回 sealed 结果（Valid/Empty/InvalidFormat/UnsupportedMarket），ViewModel 只把结果映射成 `UiState.error` 枚举，文案在 Screen 里 `stringResource` 解析；输入中不报"空"错，点提交才报；输入变化清掉上次的 `resolved`。UseCase 由 `data/.../di/StockCodeValidationModule.kt` 提供。尚未接进 app 导航（app 目前无导航，只有 Preview） |
 
 没有对应样板（项目内和 NiA 都没有）时，按 `CLAUDE.md`「开工前必读」的要求告诉我，
 一起定一个新的，不要假装样板存在或凑一个不合适的参照。
