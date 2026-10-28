@@ -1,13 +1,9 @@
 ## 当前任务
-- [ ] T-012 权限 + MediaStore → Room 同步
-      范围：`READ_MEDIA_IMAGES` 及 Android 14 部分照片访问（`READ_MEDIA_VISUAL_USER_SELECTED`）处理；
-      首次全量同步 + 基于修改时间/`generation` 的增量同步；`ContentObserver` 监听并防抖；
-      Room 初始 schema（含 bucket、`taken_at` 索引，schema JSON 导出入版本控制）；
-      Repository 接口在 domain、实现在 data。同步过程不阻塞 UI，未完成时可先出已有部分。
-      验收：100 万条全量同步耗时与内存记入基线；批量增删下增量同步正确；部分授权时界面提示数据不完整；
-      自检命令全绿。
-      依赖：T-011。patterns「离线优先 Repository」行在本任务补真实样板；完成后用真实 schema 重跑 T-011 基线，
-      摘要（年 / 月 / 日数量与封面）持久化并增量维护。
+- [ ] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈
+      范围：`app` 模块内的底部导航与路由；4 个 Tab 先挂占位页；feature 只暴露 Route 与回调。
+      使用 Navigation 3（alpha，见已确认第 4 条）。
+      验收：Tab 切换保留各自返回栈；跨 feature 无直接依赖；自检命令全绿。
+      依赖：无（T-012 底座已完成）。
 
 ## 待办
 本地相册管理（草案，2026-10-28 与用户讨论后定，尚未开工；开工前每条都要先进 plan mode 确认范围）。
@@ -50,17 +46,20 @@
 5. 不做应用内回收站；回忆不为 2 月 29 日做特殊规则（按「月-日」字面匹配，平年不带出 2 月 29 日的照片）。
 
 ### 任务
-- [ ] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈
-      范围：`app` 模块内的底部导航与路由；4 个 Tab 先挂占位页；feature 只暴露 Route 与回调。
-      使用 Navigation 3（alpha，见已确认第 4 条）。
-      验收：Tab 切换保留各自返回栈；跨 feature 无直接依赖；自检命令全绿。
-      依赖：无（可与 T-012 并行）。
 - [ ] T-014 照片·日流 + 日期滑块 + 未知日期桶
       范围：`feature:library` 新建；定义 scope 抽象（先实现 `All`）；日期流按设备时区分日，每天一个
       粘性日期头，「未知日期」桶固定在最底；日期滑块按桶下标跳转；Coil 加载缩略图并限制缓存；
       分桶规则放 domain 并单测（设备时区、跨零点、缺失时间）。
       验收：进入任一天只查该天数据；100 万条下滚动达预算；分桶边界单测通过；自检命令全绿。
       依赖：T-012、T-013。
+- [ ] T-012b 真实 schema 基线重跑与真机验证补齐（从 T-012 拆出，排在界面之后）
+      范围：`:benchmark-target` 依赖 `:data`，用合成 `MediaSource` 跑真实同步引擎，删掉原型实体 / DAO / 数据库 / 灌库器；
+      新增 `SyncBenchmark`（全量同步、1000 条增量、删除对账）；查询改读真实 `day_summary`；三档规模在华为 CLS-AL30 上分多次短运行，
+      灌库放在 `setupBlock`；产出 `docs/metrics/photo-baseline-real-schema-*.md` 并与原型基线对比；更新性能预算；
+      `docs/patterns/README.md`「离线优先 Repository」行补真实样板。
+      真机验证补齐：API 34（部分授权）分支、`ContentObserver` 触发的增量同步（拍一张 / 删一张）；API 33 分支只能靠单测。
+      验收：100 万条全量同步耗时与内存记入基线；摘要持久化后首屏内容时间不劣于原型基线（否则如实记录并停下商量）；自检命令全绿。
+      依赖：T-012、T-014（先有界面，再做性能验证）。
 - [ ] T-015 照片·年 / 月钻取
       范围：年列表 → 月（封面 = 当月最晚一张）→ 有照片的日（封面 = 当日最晚一张）；数量与封面来自
       Room 聚合，不在内存里分组；点某一天跳转到「日」流中该年该月该日的位置。
@@ -102,6 +101,15 @@
 
 新任务完成后先记在这里；本文件接近 250 行时，再把较早的条目搬进上面的归档文件。
 
+- [x] T-012 权限 + MediaStore → Room 同步（2026-10-28，底座完成；基线重跑拆为 T-012b）
+      产出：domain（`PhotoAccess`、`SyncStatus`、`LibrarySyncState`、`MediaLibraryRepository` 与观察 / 刷新两个 UseCase）；
+      data（Room schema `media_item` / `day_summary` / `dirty_day` / `sync_state` 并导出 schema，MediaStore 源按单游标读图片 + 视频，
+      全量归并对账 / 增量 / 删除对账 / 时区变化重算，日摘要在整轮同步后统一重算，ContentObserver 防抖，权限归一）；
+      app 清单声明媒体权限；`feature:home` 的最小权限与同步状态面板。提交 958c38f、747b609。
+      验证：domain 2 个、data 17 个（含 Robolectric + 内存 Room）、feature:home 5 个单测通过；自检命令退出码 0。
+      真机（华为 CLS-AL30，API 31）：同步出 1408 项，与 MediaStore 命令行统计的 1343 张图片 + 65 个视频一致。
+      未完成（见 T-012b）：100 万条基线重跑、API 34 部分授权分支与 ContentObserver 增量的真机验证。
+      注意：data / feature 下的 Kotlin 文件不能有中文注释——Konsist 的「禁止硬编码中文」正则会把两个引号之间的中文注释误判。
 - [x] T-011 压测基础设施与性能预算（2026-10-28，带已知缺口）
       范围：`:benchmark-target`（合成数据 + 原型 Room schema + 占位网格）、`:benchmark`（Macrobenchmark 五组度量）、
       `studycompose.android.test` 约定插件、`benchmark/README.md`、`docs/metrics/photo-baseline-2026-10-28.md`。
