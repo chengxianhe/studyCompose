@@ -1,0 +1,102 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "2c7d533be1887a8b06f7d3fbb9a24a53",
+    "entities": [
+      {
+        "tableName": "photo_meta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `takenAtUtcMs` INTEGER NOT NULL, `localYear` INTEGER NOT NULL, `localMonth` INTEGER NOT NULL, `localDay` INTEGER NOT NULL, `mediaType` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takenAtUtcMs",
+            "columnName": "takenAtUtcMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localYear",
+            "columnName": "localYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localMonth",
+            "columnName": "localMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localDay",
+            "columnName": "localDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaType",
+            "columnName": "mediaType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bucketId",
+            "columnName": "bucketId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_photo_meta_localYear_localMonth_localDay_takenAtUtcMs",
+            "unique": false,
+            "columnNames": [
+              "localYear",
+              "localMonth",
+              "localDay",
+              "takenAtUtcMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_photo_meta_localYear_localMonth_localDay_takenAtUtcMs` ON `${TABLE_NAME}` (`localYear`, `localMonth`, `localDay`, `takenAtUtcMs`)"
+          },
+          {
+            "name": "index_photo_meta_localMonth_localDay_localYear_takenAtUtcMs",
+            "unique": false,
+            "columnNames": [
+              "localMonth",
+              "localDay",
+              "localYear",
+              "takenAtUtcMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_photo_meta_localMonth_localDay_localYear_takenAtUtcMs` ON `${TABLE_NAME}` (`localMonth`, `localDay`, `localYear`, `takenAtUtcMs`)"
+          },
+          {
+            "name": "index_photo_meta_bucketId",
+            "unique": false,
+            "columnNames": [
+              "bucketId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_photo_meta_bucketId` ON `${TABLE_NAME}` (`bucketId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c7d533be1887a8b06f7d3fbb9a24a53')"
+    ]
+  }
+}

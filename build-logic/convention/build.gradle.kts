@@ -32,6 +32,10 @@ gradlePlugin {
             id = "studycompose.android.application.compose"
             implementationClass = "studycompose.convention.AndroidApplicationComposeConventionPlugin"
         }
+        register("androidTest") {
+            id = "studycompose.android.test"
+            implementationClass = "studycompose.convention.AndroidTestConventionPlugin"
+        }
         register("androidLibrary") {
             id = "studycompose.android.library"
             implementationClass = "studycompose.convention.AndroidLibraryConventionPlugin"

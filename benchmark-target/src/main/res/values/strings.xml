@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bench_app_name">Photo Benchmark Target</string>
+    <string name="bench_status_loading">loading</string>
+    <string name="bench_status_seed_done">seed-done</string>
+    <string name="bench_status_queries_done">queries-done</string>
+    <string name="bench_status_long_arrays_done">long-arrays-done</string>
+    <string name="bench_status_error">error</string>
+    <string name="bench_day_header">%1$04d-%2$02d-%3$02d · %4$d</string>
+    <string name="bench_unknown_header">unknown · %1$d</string>
+</resources>
