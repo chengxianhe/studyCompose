@@ -1,5 +1,13 @@
 ## 当前任务
-（当前无进行中的任务；下一条等用户定义）
+- [ ] T-012 权限 + MediaStore → Room 同步
+      范围：`READ_MEDIA_IMAGES` 及 Android 14 部分照片访问（`READ_MEDIA_VISUAL_USER_SELECTED`）处理；
+      首次全量同步 + 基于修改时间/`generation` 的增量同步；`ContentObserver` 监听并防抖；
+      Room 初始 schema（含 bucket、`taken_at` 索引，schema JSON 导出入版本控制）；
+      Repository 接口在 domain、实现在 data。同步过程不阻塞 UI，未完成时可先出已有部分。
+      验收：100 万条全量同步耗时与内存记入基线；批量增删下增量同步正确；部分授权时界面提示数据不完整；
+      自检命令全绿。
+      依赖：T-011。patterns「离线优先 Repository」行在本任务补真实样板；完成后用真实 schema 重跑 T-011 基线，
+      摘要（年 / 月 / 日数量与封面）持久化并增量维护。
 
 ## 待办
 本地相册管理（草案，2026-10-28 与用户讨论后定，尚未开工；开工前每条都要先进 plan mode 确认范围）。
@@ -42,15 +50,6 @@
 5. 不做应用内回收站；回忆不为 2 月 29 日做特殊规则（按「月-日」字面匹配，平年不带出 2 月 29 日的照片）。
 
 ### 任务
-- [ ] T-012 权限 + MediaStore → Room 同步
-      范围：`READ_MEDIA_IMAGES` 及 Android 14 部分照片访问（`READ_MEDIA_VISUAL_USER_SELECTED`）处理；
-      首次全量同步 + 基于修改时间/`generation` 的增量同步；`ContentObserver` 监听并防抖；
-      Room 初始 schema（含 bucket、`taken_at` 索引，schema JSON 导出入版本控制）；
-      Repository 接口在 domain、实现在 data。同步过程不阻塞 UI，未完成时可先出已有部分。
-      验收：100 万条全量同步耗时与内存记入基线；批量增删下增量同步正确；部分授权时界面提示数据不完整；
-      自检命令全绿。
-      依赖：T-011。patterns「离线优先 Repository」行在本任务补真实样板；完成后用真实 schema 重跑 T-011 基线，
-      摘要（年 / 月 / 日数量与封面）持久化并增量维护。
 - [ ] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈
       范围：`app` 模块内的底部导航与路由；4 个 Tab 先挂占位页；feature 只暴露 Route 与回调。
       使用 Navigation 3（alpha，见已确认第 4 条）。

@@ -1,0 +1,244 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "84d1faa31e0f35d58ec33b66ec51ebf6",
+    "entities": [
+      {
+        "tableName": "media_item",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mediaStoreId` INTEGER NOT NULL, `takenAtUtcMs` INTEGER NOT NULL, `localYear` INTEGER NOT NULL, `localMonth` INTEGER NOT NULL, `localDay` INTEGER NOT NULL, `mediaType` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL, `dateModifiedSec` INTEGER NOT NULL, `generationModified` INTEGER NOT NULL, PRIMARY KEY(`mediaStoreId`))",
+        "fields": [
+          {
+            "fieldPath": "mediaStoreId",
+            "columnName": "mediaStoreId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takenAtUtcMs",
+            "columnName": "takenAtUtcMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localYear",
+            "columnName": "localYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localMonth",
+            "columnName": "localMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localDay",
+            "columnName": "localDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaType",
+            "columnName": "mediaType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bucketId",
+            "columnName": "bucketId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateModifiedSec",
+            "columnName": "dateModifiedSec",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "generationModified",
+            "columnName": "generationModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "mediaStoreId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_media_item_localYear_localMonth_localDay_takenAtUtcMs",
+            "unique": false,
+            "columnNames": [
+              "localYear",
+              "localMonth",
+              "localDay",
+              "takenAtUtcMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_item_localYear_localMonth_localDay_takenAtUtcMs` ON `${TABLE_NAME}` (`localYear`, `localMonth`, `localDay`, `takenAtUtcMs`)"
+          },
+          {
+            "name": "index_media_item_localMonth_localDay_localYear_takenAtUtcMs",
+            "unique": false,
+            "columnNames": [
+              "localMonth",
+              "localDay",
+              "localYear",
+              "takenAtUtcMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_item_localMonth_localDay_localYear_takenAtUtcMs` ON `${TABLE_NAME}` (`localMonth`, `localDay`, `localYear`, `takenAtUtcMs`)"
+          },
+          {
+            "name": "index_media_item_bucketId",
+            "unique": false,
+            "columnNames": [
+              "bucketId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_item_bucketId` ON `${TABLE_NAME}` (`bucketId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "day_summary",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localYear` INTEGER NOT NULL, `localMonth` INTEGER NOT NULL, `localDay` INTEGER NOT NULL, `total` INTEGER NOT NULL, `coverId` INTEGER NOT NULL, `latestTakenAt` INTEGER NOT NULL, PRIMARY KEY(`localYear`, `localMonth`, `localDay`))",
+        "fields": [
+          {
+            "fieldPath": "localYear",
+            "columnName": "localYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localMonth",
+            "columnName": "localMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localDay",
+            "columnName": "localDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coverId",
+            "columnName": "coverId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latestTakenAt",
+            "columnName": "latestTakenAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localYear",
+            "localMonth",
+            "localDay"
+          ]
+        }
+      },
+      {
+        "tableName": "dirty_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localYear` INTEGER NOT NULL, `localMonth` INTEGER NOT NULL, `localDay` INTEGER NOT NULL, PRIMARY KEY(`localYear`, `localMonth`, `localDay`))",
+        "fields": [
+          {
+            "fieldPath": "localYear",
+            "columnName": "localYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localMonth",
+            "columnName": "localMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localDay",
+            "columnName": "localDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localYear",
+            "localMonth",
+            "localDay"
+          ]
+        }
+      },
+      {
+        "tableName": "sync_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `lastGeneration` INTEGER NOT NULL, `lastSyncSec` INTEGER NOT NULL, `mediaStoreVersion` TEXT NOT NULL, `zoneId` TEXT NOT NULL, `lastSyncAtMs` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastGeneration",
+            "columnName": "lastGeneration",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncSec",
+            "columnName": "lastSyncSec",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaStoreVersion",
+            "columnName": "mediaStoreVersion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zoneId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncAtMs",
+            "columnName": "lastSyncAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84d1faa31e0f35d58ec33b66ec51ebf6')"
+    ]
+  }
+}

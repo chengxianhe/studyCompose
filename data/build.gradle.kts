@@ -12,6 +12,13 @@ android {
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
+
+    testOptions {
+        unitTests {
+            // Robolectric 需要它来提供内存 Room 与权限相关的 Android 环境
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -26,8 +33,10 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
 }
