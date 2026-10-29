@@ -3,6 +3,10 @@ package com.study.cc.core.designsystem.theme
 import androidx.compose.ui.unit.dp
 
 object Sizes {
+    // 照片日期滑块
+    val dateScrubberTrackWidth = 2.dp
+    val dateScrubberThumbSize = 24.dp
+
     // 导航
     val topBarHeight = 64.dp
     val topBarHeightLarge = 112.dp
