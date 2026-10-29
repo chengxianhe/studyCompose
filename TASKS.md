@@ -1,9 +1,5 @@
 ## 当前任务
-- [ ] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈
-      范围：`app` 模块内的底部导航与路由；4 个 Tab 先挂占位页；feature 只暴露 Route 与回调。
-      使用 Navigation 3（alpha，见已确认第 4 条）。
-      验收：Tab 切换保留各自返回栈；跨 feature 无直接依赖；自检命令全绿。
-      依赖：无（T-012 底座已完成）。
+- （待确认下一项）
 
 ## 待办
 本地相册管理（草案，2026-10-28 与用户讨论后定，尚未开工；开工前每条都要先进 plan mode 确认范围）。
@@ -101,6 +97,13 @@
 
 新任务完成后先记在这里；本文件接近 250 行时，再把较早的条目搬进上面的归档文件。
 
+- [x] T-013 App 骨架：4 Tab 底部导航 + 各 Tab 独立返回栈（2026-10-29）
+      产出：`app` 内用 Navigation 3 1.0.1 管理照片、相册、回忆、修图四个独立返回栈；各 Tab 根页返回直接退出；
+      照片接现有 `HomeRoute`，其他 Tab 先用占位页；导航样板补入 `docs/patterns/README.md`。
+      验证：导航单测 6 个通过；`./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard` 退出码 0。
+      华为 ELE-AL00 真机：四个 Tab 可切换，修图切回照片后首页状态可见；四个根页返回均退出应用；
+      横屏后仍停留在回忆；后台进程被杀后从桌面入口恢复仍停留在回忆；截图未见系统栏遮挡。
+      各 Tab 的二级返回栈目前只有单测覆盖，待后续任务加入二级页面后再做真机验证。
 - [x] T-012 权限 + MediaStore → Room 同步（2026-10-28，底座完成；基线重跑拆为 T-012b）
       产出：domain（`PhotoAccess`、`SyncStatus`、`LibrarySyncState`、`MediaLibraryRepository` 与观察 / 刷新两个 UseCase）；
       data（Room schema `media_item` / `day_summary` / `dirty_day` / `sync_state` 并导出 schema，MediaStore 源按单游标读图片 + 视频，

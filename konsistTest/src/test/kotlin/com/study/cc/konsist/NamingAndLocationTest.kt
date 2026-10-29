@@ -60,6 +60,9 @@ class NamingAndLocationTest {
             .scopeFromProject()
             .functions()
             .filter { it.hasAnnotationWithName("Composable") }
+            // Composables that return a value (rememberXxx and friends) follow the lowerCamel convention of the
+            // Compose API guidelines; only the ones that emit UI (no declared return type or Unit) must be PascalCase.
+            .filter { it.returnType == null || it.returnType?.name == "Unit" }
             .assertTrue { it.name.firstOrNull()?.isUpperCase() == true }
     }
 }

@@ -13,6 +13,7 @@ offline-first 的官方样板项目，本项目 build-logic 的约定插件设�
 |---|---|---|
 | 新建 feature 模块 | `feature/home/` | 模块结构、`studycompose.android.feature` 约定插件已经带好 domain/core/Hilt 依赖 |
 | 页面三态 | `core/ui/src/main/kotlin/com/study/cc/core/ui/state/` | `LoadingState`/`EmptyState`/`ErrorState` 用法 |
+| 底部多 Tab 导航（每个 Tab 独立返回栈） | `app/src/main/java/com/study/cc/navigation/`（`NavigationState` / `Navigator` / `AppNavHost`） | 参照官方 nav3-recipes 的 multiple-backstacks；**与官方示例不同**：`toDecoratedEntries` 只返回当前 Tab 的条目，所以任何 Tab 根页面按返回键都直接退出应用（官方示例是先回到起始 Tab）。导航与路由放 `app`，feature 只暴露 `XxxRoute`。用 Navigation 3 的 **1.0.1**，不是 1.2.0：1.1.x/1.2.0 要求 compileSdk 37 / AGP 9.1+（1.1.x 还会把整个应用的 Compose 抬到 1.10+） |
 | 新建 UseCase | （待补，参照 NiA `GetFollowableTopicsUseCase` 的 `operator fun invoke()` 写法；**与 NiA 不同**：Repository 接口放 `domain/.../repository/`，不是 NiA 的 `core.data.repository`，因为 Konsist 断言 domain 不允许出现任何 `.data.` import；UseCase 不用 `@Inject constructor`，改由 data 层 `di/` 下的 `@Provides` 提供实例） | 旧样板已随股票相关代码移除（T-010），可在 git 历史 795060d 之前查看 |
 | 简单 Repository（非离线优先） | （待补；接口在 domain、实现在 data，Hilt `@Binds` 绑定参照 `core/logging/LoggingModule.kt` 的写法） | 旧样板已随股票相关代码移除（T-010） |
 | 离线优先 Repository | （待补，参照 NiA `core/data` 下 `OfflineFirstXxxRepository` + `changeListSync` 的写法；接口位置仍要按上面那条改放 domain） | |

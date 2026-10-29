@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">studyCompose</string>
+    <string name="tab_photos">照片</string>
+    <string name="tab_albums">相册</string>
+    <string name="tab_memories">回忆</string>
+    <string name="tab_editor">修图</string>
+    <string name="tab_placeholder_message">功能建设中</string>
 </resources>

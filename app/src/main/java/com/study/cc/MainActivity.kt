@@ -55,8 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 // AppTheme 是 :core:designsystem 的主题入口，视觉 token 的唯一来源。
 import com.study.cc.core.designsystem.theme.AppTheme
-// HomeRoute 是 feature:home 对外暴露的首页入口 Composable。
-import com.study.cc.feature.home.HomeRoute
+// AppNavHost 是应用外壳：底部 4 个 Tab 和各自独立的返回栈。
+import com.study.cc.navigation.AppNavHost
 // 旧的 Android Studio 生成主题，CounterScreenPreview 仍在用，保留供其预览使用。
 import com.study.cc.ui.theme.StudyComposeTheme
 // AndroidEntryPoint 让 Hilt 能给这个 Activity（以及它下面的 Compose 树）注入依赖。
@@ -77,8 +77,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             // 把整页放进设计系统主题中，子组件可通过 MaterialTheme 读取统一样式。
             AppTheme {
-                // HomeRoute 自己持有 Hilt 注入的 ViewModel，负责首页的状态和事件。
-                HomeRoute()
+                // 各 Tab 的页面自己持有 Hilt 注入的 ViewModel，导航状态由 AppNavHost 管理。
+                AppNavHost()
             }
         }
     }
