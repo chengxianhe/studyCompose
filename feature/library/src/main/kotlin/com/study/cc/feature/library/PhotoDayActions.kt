@@ -7,4 +7,3 @@ data class PhotoDayActions(
     val onRetryClick: () -> Unit,
     val onDaysVisible: (Set<PhotoDay>) -> Unit,
 )
-

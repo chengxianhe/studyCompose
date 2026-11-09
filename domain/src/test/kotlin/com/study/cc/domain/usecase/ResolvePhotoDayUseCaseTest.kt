@@ -2,9 +2,9 @@ package com.study.cc.domain.usecase
 
 import com.google.common.truth.Truth.assertThat
 import com.study.cc.domain.model.PhotoDay
+import org.junit.Test
 import java.time.Instant
 import java.time.ZoneId
-import org.junit.Test
 
 private const val YEAR = 2026
 private const val MONTH = 10
