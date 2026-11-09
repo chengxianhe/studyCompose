@@ -13,6 +13,8 @@ abstract class MediaLibraryDatabase : RoomDatabase() {
 
     abstract fun daySummaryDao(): DaySummaryDao
 
+    abstract fun photoTimelineDao(): PhotoTimelineDao
+
     abstract fun dirtyDayDao(): DirtyDayDao
 
     abstract fun syncStateDao(): SyncStateDao

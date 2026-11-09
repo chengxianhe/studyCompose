@@ -1,4 +1,4 @@
-package com.study.cc.feature.home
+package com.study.cc.core.common
 
 import android.os.Build
 

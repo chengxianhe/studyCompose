@@ -41,7 +41,7 @@ dependencies {
     implementation(project(":core:logging"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
-    implementation(project(":feature:home"))
+    implementation(project(":feature:library"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

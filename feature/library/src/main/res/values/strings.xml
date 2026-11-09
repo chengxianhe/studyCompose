@@ -1,0 +1,19 @@
+<resources>
+    <string name="library_day_title">照片</string>
+    <string name="library_day_empty">暂无照片</string>
+    <string name="library_day_access_required">允许访问照片后即可查看日期流</string>
+    <string name="library_day_grant_action">授权访问</string>
+    <string name="library_day_partial_access">当前仅能查看已授权的部分照片</string>
+    <string name="library_day_extend_access">选择更多照片</string>
+    <string name="library_day_load_failed">照片加载失败</string>
+    <string name="library_day_sync_failed">同步失败，正在显示已有照片</string>
+    <string name="library_day_retry">重试</string>
+    <string name="library_day_count">已同步 %1$d 项</string>
+    <string name="library_day_header">%1$d 年 %2$d 月 %3$d 日 · %4$d 项</string>
+    <string name="library_day_unknown_header">未知日期 · %1$d 项</string>
+    <string name="library_date_scrubber_day">%1$d 年 %2$d 月 %3$d 日</string>
+    <string name="library_date_scrubber_unknown">未知日期</string>
+    <string name="library_date_scrubber_label">日期滑块</string>
+    <string name="library_photo_thumbnail">照片缩略图</string>
+    <string name="library_video_thumbnail">视频缩略图</string>
+</resources>

@@ -29,7 +29,7 @@ include(":core:logging")
 include(":core:designsystem")
 include(":core:ui")
 include(":feature:home")
+include(":feature:library")
 include(":benchmark-target")
 include(":benchmark")
 include(":konsistTest")
- 

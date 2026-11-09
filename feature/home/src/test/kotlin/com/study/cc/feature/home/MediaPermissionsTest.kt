@@ -2,6 +2,7 @@ package com.study.cc.feature.home
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.study.cc.core.common.MediaPermissions
 import org.junit.Test
 
 class MediaPermissionsTest {

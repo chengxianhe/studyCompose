@@ -17,7 +17,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.study.cc.R
-import com.study.cc.feature.home.HomeRoute
+import com.study.cc.feature.library.PhotoDayRoute
 
 /** App shell: bottom bar with the four tabs and the navigation display for the selected tab. */
 @Composable
@@ -30,7 +30,7 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     val navigator = remember(state) { Navigator(state) }
     val entryProvider =
         entryProvider<NavKey> {
-            entry<PhotosRoute> { HomeRoute() }
+            entry<PhotosRoute> { PhotoDayRoute() }
             entry<AlbumsRoute> { TabPlaceholderScreen(R.string.tab_albums) }
             entry<MemoriesRoute> { TabPlaceholderScreen(R.string.tab_memories) }
             entry<EditorRoute> { TabPlaceholderScreen(R.string.tab_editor) }
