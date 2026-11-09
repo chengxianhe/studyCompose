@@ -2,8 +2,8 @@
 
 对应 `../docs/ai-engineering-governed-delivery-platform.md`（完整方案）和
 `../docs/ai-engineering-governed-delivery-platform-baseline.md`（阶段决策
-记录与验收状态）。这是"AI 工程受控交付平台"里已经落地的部分——知识治理
-（阶段0/1）+ 交付契约（阶段2）+ Harness 状态追踪（阶段3）。跟
+记录与验收状态）。当前已实现知识治理、交付契约、Harness 状态追踪、
+本机人工审核与会话内验证/交付证据流程。跟
 studyCompose 的 Android app 完全隔离，通过 MCP 接入 Claude Code / Codex。
 
 ## 能做什么
@@ -68,8 +68,8 @@ studyCompose 的 Android app 完全隔离，通过 MCP 接入 Claude Code / Code
   **升级**（终态）；如果未解决的**全部**是 `manual_evidence` 类型（代码
   没问题，就差人确认），停在 `WAITING_FOR_HUMAN`，不消耗修复轮次。
 - **交付**（HTTP `POST /harness-runs/{id}/deliver`，**只有你能做**）：
-  运行状态必须是"全部通过"才能标记交付，Harness 自己能自动跑到那一步，
-  但不能自己点"交付"——这是"最终交付你来审"这条原则的落地点。
+  运行状态必须是"全部通过"才能标记交付；执行 Agent 记录自动结果，用户确认人工项，
+  最终由用户执行交付。Harness 本身不启动开发或替用户确认结果。
 
 **验收边界**：当前由执行 Agent 记录真实自动检查结果，用户确认人工 AC 与最终交付。
 人工补审保留本轮已有自动证据，不把它改记成人工结果；明确不通过进入修复，待定项等待用户。
@@ -78,6 +78,17 @@ studyCompose 的 Android app 完全隔离，通过 MCP 接入 Claude Code / Code
 
 验证 CLI 可以实际执行统一检查并导入证据，说明见 `../docs/workflow.md`。
 状态机仍不是后台开发调度器，编写代码与修复由当前 Agent 会话执行，不默认启动模型审查。
+
+### 会话内验证与交付（T-025）
+
+`python -m govplatform.delivery` 提供 `prepare / verify / submit / status`：
+对用户已启动的运行建立准入快照、执行统一检查、提交自动验收证据并读取接续状态。
+HEAD、源码指纹、日志及验证模式必须匹配；这些命令不能代替人工批准、冻结或启动运行。
+完整命令与边界见 [执行与验收流程](../docs/workflow.md)。
+
+T-025 已于 2026-11-06 经用户确认交付，记录见 [任务接续](../docs/tasks/t-025.md)。
+2026-11-09 提交版本 `d4f5f5b` 的完整检查通过，平台 120 个测试通过；
+这不表示其他任务的人工项或 Android 业务验收也已完成。
 
 ### 4. 身份与审计——谁做了什么，全程留痕
 
@@ -90,8 +101,9 @@ studyCompose 的 Android app 完全隔离，通过 MCP 接入 Claude Code / Code
 
 - **审计数据只写不读。** 没有任何工具能查询这张表，想知道"这条知识是谁
   批的"只能直接打开 SQLite 文件手写 SQL。
-- **真实使用刚开始。** 21 条知识已由用户审核生效；T-023 是首次接入真实契约/运行，
-  Android T-014 的完整业务闭环尚未执行，不能把平台单测当作业务验收。
+- **不同任务分别验收。** T-022 知识可用性和 T-025 会话闭环已有用户确认记录；
+  T-023 仍保留人工待审项，Android T-014 已有正式运行，但设备补验与人工审查尚未完成。
+  状态见 [TASKS.md](../TASKS.md)，不能把平台单测当作业务验收。
 - **身份是自报的，不是密码学验证的。** 只适合本机受信任进程，不能防
   冒充，见 `docs/design-notes.md`"已知的信任边界"。
 - **单机 SQLite，备份默认也在本机。** 已有一致性快照和恢复校验；异机备份仍需用户安排。
@@ -125,9 +137,13 @@ curl -X POST localhost:8000/knowledge/propose -H 'content-type: application/json
   "caller": {"principal_type": "agent", "kind": "claude-code", "session_id": "manual"}
 }'
 
-# MCP server（stdio），Claude Code / Codex 通过根目录 .mcp.json 接入
+# MCP server（stdio）；客户端配置示例见根目录 .mcp.json
 uv run python -m govplatform.mcp_server.server
 ```
+
+MCP 暴露 `knowledge.list/get/search/propose`、`contract.create/get/update` 和
+`harness.record_entry_gate/record_acceptance/get`。按所用客户端的配置方式添加服务，
+将工作目录设为仓库根目录（或为 `--project` 使用绝对路径）；不要假定所有客户端都会自动加载 `.mcp.json`。
 
 ## 目录结构
 
@@ -153,6 +169,9 @@ uv run python -m govplatform.mcp_server.server
   `contract_service.get_without_audit()`/`is_ac_waived()`，是它对
   `contract/` 的唯一依赖。
 - `audit/` —— 审计事件的写入（目前没有对应的查询工具，见上文限制）。
+- `review/` —— 本机人工审核页、任务确认、人工验收与一次性操作票据。
+- `delivery/` —— 会话准入快照、统一检查证据导入与审查包生成。
+- `backup.py` —— 本机数据库快照及恢复校验。
 - `db/` —— SQLite schema 和连接管理。
 - `mcp_server/` —— MCP 工具出口（`knowledge.*`、`contract.*`、
   `harness.*`——`harness.start`/`contract.freeze`/`request_waiver`/

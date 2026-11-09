@@ -2,100 +2,130 @@
 
 [中文](README.md) | English
 
-A personal reference project on keeping AI-assisted Android development under
-architectural control: architecture rules are enforced by machine assertions
-(Konsist, detekt, lint, Dependency Guard) instead of living only in documents.
+A local photo library app in development, and a practical project for AI-assisted Android engineering.
+The app uses a multi-module Jetpack Compose architecture with automated checks for layering,
+design-system rules and dependencies. A separate Python platform manages knowledge review,
+task contracts and verification evidence; users retain final review and delivery approval.
 
-It has two parts, fully isolated from each other:
+## Current capabilities
 
-- a multi-module Jetpack Compose Android app skeleton;
-- a standalone "governed AI knowledge platform" prototype (`platform/`). It is not
-  part of the Gradle build, and the Android architecture rules do not apply to it.
+### Android photo library
 
-## What's in this repository
+| Feature | Status |
+|---|---|
+| Media permissions and sync | Reads images and videos from MediaStore and syncs lightweight metadata to Room, including incremental changes, deletion reconciliation and time-zone changes |
+| Daily timeline | Fixed five-column grid, sticky date headers and a date scrubber; days follow the device time zone, with unknown dates at the bottom |
+| On-demand loading | Queries media for visible days, with cancellation, retries and cache eviction; Coil loads thumbnails with bounded caches |
+| Four-tab navigation | Navigation 3 maintains separate back stacks; Photos shows the timeline, while Albums, Memories and Editor are placeholders |
+| Planned features | Year/month drill-down, album content, on-this-day memories, full-screen viewing, favorites, delete/move and editing are not implemented yet |
 
-```
-app/ feature/* core/* domain/* data/*   Android app, Google's recommended layering + UDF
-build-logic/                            Gradle convention plugins
-konsistTest/                            Machine assertions for the architecture rules
-docs/                                   Architecture, process and AI-collaboration docs
-template/                               Reusable scaffold extracted from this project
-platform/                               Standalone Python service: knowledge-governance prototype
-CLAUDE.md / AGENTS.md                   Hard rules for AI collaborators (AGENTS.md is a symlink to CLAUDE.md)
-```
+Timeline checks pass and some device scenarios have been verified, but **T-014 still needs additional
+device validation and human review**. Gaps include RAW thumbnails such as CR3/RAF, the full permission
+journey, back navigation and unknown-date scenarios. One million items is a target, not an accepted
+performance result; T-012b tracks validation with the real schema, images and scrolling UI.
+See [active tasks](TASKS.md) and the [T-014 handoff](docs/tasks/t-014.md).
 
-Documents under `docs/` and the rule files are written in Chinese.
+### Knowledge and task delivery platform
+
+`platform/` is a standalone local Python prototype. It is outside the Gradle build and is not needed
+to run the Android app.
+
+- **Knowledge governance:** proposals, catalog and full-text access, human approval/deprecation,
+  BM25 and local vector search, plus backup and restore.
+- **Task contracts:** structured acceptance criteria and test cases, version checks, human contract
+  freezing and run initiation.
+- **Execution evidence:** session commands `prepare / verify / submit / status` connect source snapshots,
+  verification runs and acceptance records.
+- **Human controls:** a local web interface for knowledge review, task confirmation, manual acceptance
+  and final delivery. Agents do not approve on the user's behalf.
+- **MCP tools:** `knowledge.list/get/search/propose`, `contract.create/get/update` and
+  `harness.record_entry_gate/record_acceptance/get`; see [.mcp.json](.mcp.json).
+
+The real [T-025](docs/tasks/t-025.md) session workflow received user delivery approval on November 6, 2026.
+T-023 and T-014 retain their own outstanding review items. The platform has no background scheduler
+that continues development after a session closes. Identity declarations and evidence checks assume
+trusted local processes; they do not provide protection against forged identities.
+See the [platform README](platform/README.md), [knowledge guide](docs/knowledge/README.md) and
+[workflow guide](docs/workflow.md). Detailed project documents are in Chinese.
 
 ## Getting started
 
-### Android part
+Run these commands from the repository root.
+
+### Android app
+
+Use JDK 17, as in CI, Android SDK 36 and Python 3. Open the repository in Android Studio,
+or configure the SDK path in your local `local.properties`. The minimum supported Android version
+is Android 7.0 (API 24).
 
 ```bash
-bash scripts/verify.sh android  # full gates and debug APK build
+# Run all Android gates and build the debug APK
+bash scripts/verify.sh android
 ```
 
-- See [docs/workflow.md](docs/workflow.md) for the workflow and independent model review; `TASKS.md` tracks active work.
-- Read `AGENTS.md` (linked to `CLAUDE.md`) first. Layering, design-system tokens and logging rules are
-  hard rules there; violating them turns CI red.
-- For how to write a specific kind of feature, look it up in
-  `docs/patterns/README.md` and follow the real code it points to.
-- To see how the scaffold was built from scratch, read
-  `docs/compose-ai-bootstrap-final.md`. To start a new multi-module Compose
-  project, use `template/` directly.
+The APK is at `app/build/outputs/apk/debug/app-debug.apk`. You can install and run through Android
+Studio; the Photos screen requires the user to grant the relevant media read permissions.
 
-### `platform/` (AI knowledge-governance prototype)
+### Local review interface
+
+The platform requires Python 3.11+ and `uv`.
 
 ```bash
-bash scripts/verify.sh platform
+uv sync --project platform --locked
+uv run --project platform python -m govplatform.review
 ```
 
-- It exposes two MCP tools, `knowledge.search` and `knowledge.propose`, configured
-  in `.mcp.json` at the repository root. Claude Code and Codex ask whether to
-  trust it when you open this repository; once trusted, the tools are available
-  in the session.
-- For usage, known trust boundaries and implemented checks, see `platform/README.md`.
-- For design background and trade-offs, see
-  `docs/ai-engineering-governed-delivery-platform.md` (full proposal) and
-  `docs/ai-engineering-governed-delivery-platform-baseline.md` (phase-0 decisions
-  and acceptance status).
+Open <http://127.0.0.1:8765/> or the task page at <http://127.0.0.1:8765/tasks>.
+The Android app and review interface can be used independently. See the
+[platform README](platform/README.md) for MCP integration.
 
-## Current status — don't overestimate it
+## Verification and delivery
 
-- Android: Konsist, detekt, lint, tests, Spotless, Dependency Guard and debug APK builds must pass.
-  Jacoco/APK size remain advisory. Remote merge blocking also requires branch rules; YAML alone is not proof.
-- `platform/`: knowledge approval/search, delivery contracts and Harness state tracking were implemented
-  in T-P0–T-P8. This remains a prototype; a real task has not yet completed end-to-end acceptance.
-  See `docs/tasks/completed-platform.md`.
-- The app now targets local photo management. `TASKS.md` and task handoff notes record progress,
-  existing uncommitted work and outstanding performance acceptance.
-
-## Maintenance plan
-
-Two separate escalation paths, one for Android code rules and one for the knowledge base.
-
-**Android: from mistake to rule** (defined in `docs/LESSONS.md`, already in use):
-
-```
-one-off mistake   → fix it on the spot, don't record it
-repeated twice    → record in docs/LESSONS.md; the AI suggests moving it to the knowledge base
-repeated 3 times  → distill into a hard rule in CLAUDE.md
-machine-checkable → upgrade to a Konsist / detekt / hook assertion, then delete from LESSONS.md
+```bash
+bash scripts/verify.sh android   # Architecture, static checks, tests, formatting, dependencies and APK
+bash scripts/verify.sh platform  # ruff, mypy, pytest and MCP import
+bash scripts/verify.sh all       # Both components, including workflow script tests
 ```
 
-**`platform/` roadmap** (details in §6 of the baseline document):
+The entry point saves HEAD, before/after source fingerprints, full logs and exit codes under the
+local `.verification/` directory. Source changes during a run invalidate the result.
+Verification evidence and the platform's runtime database are excluded from Git.
 
-- Now: phase 0–3 prototype work is archived. Validate real usage when explicitly tasked; do not expand governance automatically.
-- Known debt, deliberately deferred: no cleanup job yet for the 90-day audit-log
-  retention target (data volume is small); only one project can own a knowledge
-  base today, and sharing it across projects needs a "space" isolation concept
-  first (§5 of the proposal, intentionally skipped in phase 0).
+Commit `d4f5f5b` passed `all` on November 9, 2026: 9 workflow tests, the complete Android gates and
+120 platform tests. This records automated checks for that version; it does not replace device,
+performance or human acceptance. CI uses the same entry point. Remote merge blocking still requires
+branch rules; Jacoco and APK-size reporting are advisory.
 
-## Maintainer
+## Repository structure
 
-A personal project maintained by `chengxianhe`, primarily developed with Codex.
-Claude configuration is retained for compatibility. Found a problem or have an idea? Open an issue.
+```text
+app/                  App entry, four-tab navigation and dependency assembly
+feature/library/      Daily timeline; module intended to share future album/memory UI
+feature/home/         Retained permissions and sync-status screen
+domain/               Pure Kotlin entities, repository interfaces and use cases
+data/                 MediaStore, Room, sync and repository implementations
+core/                 Design system, shared UI, logging and common utilities
+build-logic/          Gradle convention plugins
+konsistTest/          Architecture and design-rule assertions
+benchmark*/           Performance tests and benchmark target app
+platform/             Independent knowledge and task delivery platform
+scripts/              Verification entry point and source fingerprinting
+docs/                 Task handoffs, architecture, evidence and workflow guides
+template/             Reusable scaffold reference
+```
 
-## License
+Dependencies follow `app → feature → domain ← data`; features may depend on core, but not on other
+features or data directly. UI follows unidirectional data flow. ViewModels access business logic
+through use cases and expose StateFlow. Visual tokens belong to the design system and user-facing
+text belongs in string resources.
 
-[MIT License](LICENSE) — use, modify and use commercially; just keep the
-copyright notice.
+Before development, read [AGENTS.md](AGENTS.md), which links to [CLAUDE.md](CLAUDE.md), and the
+[real-code pattern index](docs/patterns/README.md). Implementers run automated checks; users perform
+final code review. Independent model review is not enabled by default. See the
+[architecture bootstrap guide](docs/compose-ai-bootstrap-final.md) for background; current project
+rules take precedence over historical workflow descriptions.
+
+## Maintenance and license
+
+A personal project maintained by `chengxianhe`, primarily developed with Codex, with Claude
+configuration retained for compatibility. Issues and suggestions are welcome. [MIT License](LICENSE).

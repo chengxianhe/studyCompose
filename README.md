@@ -2,87 +2,115 @@
 
 中文 | [English](README.en.md)
 
-一个关于「让 AI 辅助的 Android 开发始终受架构约束」的个人参考项目：架构规则用机器断言
-（Konsist、detekt、lint、Dependency Guard）强制执行，而不是只写在文档里。
+一个正在开发的本地相册应用，也是 AI 辅助 Android 开发的工程实践项目。
+应用采用 Jetpack Compose 多模块架构，以机器检查约束代码分层、设计系统和依赖；
+独立的 Python 平台负责知识审核、任务契约与验证证据，最终审查和交付由用户确认。
 
-具体是一个 Jetpack Compose 多模块 Android 工程脚手架，外加一个独立的
-「受治理 AI 知识平台」原型（`platform/`）。两部分完全隔离，`platform/`
-不进 Gradle 构建，Android 那边的架构规则也不约束 `platform/`。
+## 当前功能
 
-## 这个仓库有什么
+### Android 相册
 
-```
-app/ feature/* core/* domain/* data/*   Android app，官方架构分层 + UDF
-build-logic/                            Gradle 约定插件
-konsistTest/                            架构规则的机器断言
-docs/                                   架构/流程/AI协作方案文档
-template/                               从这个工程提炼出的可复用脚手架，另起新工程用
-platform/                               独立 Python 服务：知识治理原型（见下）
-CLAUDE.md / AGENTS.md                   AI 协作硬规则（后者是前者的符号链接）
-```
+| 功能 | 当前状态 |
+|---|---|
+| 媒体权限与同步 | 从系统 MediaStore 读取图片和视频，轻量元数据同步到 Room；支持增量、删除对账和时区变化重算 |
+| 照片日流 | 固定五列网格、粘性日期头、日期滑块跳转；按设备时区分日，未知日期桶置底 |
+| 按需加载 | 根据可见日期查询当天数据，支持请求取消、失败重试与缓存淘汰；Coil 加载缩略图并限制缓存 |
+| 四 Tab 导航 | Navigation 3 管理独立返回栈；照片已接入日流，相册、回忆、修图目前为占位页 |
+| 后续功能 | 年/月钻取、相册内容、历史上的今天、大图查看、收藏、删除/移动和修图尚未实现 |
 
-## 怎么用
+日流自动检查已通过，部分真机场景已验证，**T-014 仍待补充设备验证和人工审查**。
+RAW（如 CR3/RAF）缩略图、完整权限旅程、返回与未知桶等场景仍有验证缺口。
+百万张规模是目标，真实 schema、图片与滚动性能验收由 T-012b 承接，尚未完成。
+详见 [当前任务](TASKS.md) 和 [T-014 接续记录](docs/tasks/t-014.md)。
 
-### Android 部分
+### 知识与任务交付平台
+
+`platform/` 是独立的本机 Python 原型，不参与 Gradle 构建，Android 应用运行不依赖它。
+
+- **知识治理**：提案、目录与全文查看、人工审核/废弃、BM25 与本地向量混合检索，以及备份恢复。
+- **任务契约**：结构化验收标准和测试用例、版本校验、人工冻结与运行启动。
+- **执行与证据**：会话内的 `prepare / verify / submit / status` 命令连接源码快照、统一检查和验收记录。
+- **人工入口**：本机网页提供知识审核、任务确认、人工验收与最终交付；Agent 不代替用户批准。
+- **MCP 工具**：`knowledge.list/get/search/propose`、`contract.create/get/update`、
+  `harness.record_entry_gate/record_acceptance/get`，配置见 [.mcp.json](.mcp.json)。
+
+[T-025](docs/tasks/t-025.md) 的真实会话闭环已于 2026-11-06 经用户确认交付；
+T-023、T-014 的待审项仍分别保留。平台没有关闭会话后持续开发的后台调度器；
+身份声明和证据校验面向本机受信任进程，不提供防伪身份保证。
+详见 [平台 README](platform/README.md)、[知识操作](docs/knowledge/README.md) 和 [工作流](docs/workflow.md)。
+
+## 快速开始
+
+以下命令均从仓库根目录运行。
+
+### Android 应用
+
+准备 JDK 17（与 CI 一致）、Android SDK 36 和 Python 3。在 Android Studio 中打开仓库，
+或在本机 `local.properties` 配置 SDK 路径。应用最低支持 Android 7.0（API 24）。
 
 ```bash
-bash scripts/verify.sh android  # 完整门禁 + debug APK 构建
+# 完整检查并构建 debug APK
+bash scripts/verify.sh android
 ```
 
-- 工作流与独立模型回归见 [docs/workflow.md](docs/workflow.md)，当前任务见 `TASKS.md`。
-- 开工前先读 `AGENTS.md`（链接到 `CLAUDE.md`）——架构分层、设计系统 token、日志规范这些硬规则都在这里，
-  违反了 CI 会红。
-- 具体场景该怎么写，先查 `docs/patterns/README.md` 找对应索引再动手。
-- 想了解这套脚手架是怎么从零搭起来的，看 `docs/compose-ai-bootstrap-final.md`；
-  要另起一个新的 Compose 多模块工程，直接用 `template/` 目录，不用从这个仓库里现拆。
+APK 位于 `app/build/outputs/apk/debug/app-debug.apk`。可通过 Android Studio 安装运行；
+照片页面需要用户授予相应媒体读取权限。
 
-### `platform/`（AI 知识治理原型）
+### 本机审核页
+
+平台需要 Python 3.11+ 和 `uv`。
 
 ```bash
-bash scripts/verify.sh platform
+uv sync --project platform --locked
+uv run --project platform python -m govplatform.review
 ```
 
-- 通过 MCP 暴露 `knowledge.search` / `knowledge.propose` 两个工具，配置写在仓库根目录
-  的 `.mcp.json` 里——用 Claude Code 或 Codex 打开这个仓库时会提示是否信任，信任后
-  这两个工具就能直接在对话里用。
-- 具体用法、已知的信任边界、已经实现的检测能力，看 `platform/README.md`。
-- 设计背景和取舍，看 `docs/ai-engineering-governed-delivery-platform.md`（完整方案）
-  和 `docs/ai-engineering-governed-delivery-platform-baseline.md`（阶段0落地决策+
-  验收状态）。
+打开 <http://127.0.0.1:8765/>，任务入口为 <http://127.0.0.1:8765/tasks>。
+Android 应用与审核页可分别使用；MCP 接入方式见 [平台 README](platform/README.md)。
 
-## 现在是什么状态，别高估
+## 验证与交付
 
-- Android 侧：Konsist、detekt、lint、单测、Spotless、Dependency Guard 与 debug APK 构建全部必过；
-  Jacoco/APK 体积仅报告。远端合并阻断还需配置分支规则，不能仅凭 YAML 宣称已强制。
-- `platform/` 侧：知识审核检索、交付契约、Harness 状态追踪已在 T-P0～T-P8 实现；
-  这仍是原型，真实任务全流程验收尚未完成，见 `docs/tasks/completed-platform.md`。
-- 当前业务为本地相册；进度、既有未提交实现和未验收性能目标以 `TASKS.md` 及任务接续记录为准。
-
-## 维护计划
-
-两条不同的升级路径，分别对应 Android 代码规则和知识库本身：
-
-**Android 侧的"踩坑 → 规则"升级路径**（`docs/LESSONS.md` 定义，已经在跑）：
-
-```
-一次性错误   → 当场改掉，不记录
-重复 2 次    → 记进 docs/LESSONS.md，AI 会提示可以写进知识库了
-重复 3 次    → 提炼成 CLAUDE.md 硬规则
-可机器检测   → 升级成 Konsist / detekt / hook 断言，然后从 LESSONS.md 删除
+```bash
+bash scripts/verify.sh android   # 架构、静态检查、单测、格式、依赖基线与 APK
+bash scripts/verify.sh platform  # ruff、mypy、pytest 与 MCP 导入
+bash scripts/verify.sh all       # 两端完整检查，含工作流脚本测试
 ```
 
-**`platform/` 侧的路线图**（细节见 baseline 文档 §6）：
+统一入口保存 HEAD、前后源码指纹、完整日志与退出码到本机 `.verification/`。
+源码在检查期间变化会使结果失效；检查证据和平台运行数据库不提交到 Git。
 
-- 当前：阶段0～3 的原型能力已有归档；下一步按用户明确任务验证真实使用，不自行扩建治理系统。
-- 已知但暂不处理的技术债：审计日志 90 天保留目标还没有清理任务（数据量小，
-  不着急）；现在只支持单个工程独享一份知识库，多个工程共享需要先补上"空间"
-  隔离概念（原方案 §5，阶段0故意没做），不是简单改改配置就行。
+2026-11-09 的提交版本 `d4f5f5b` 已通过 `all`：工作流 9 个测试、Android 完整门禁、
+平台 120 个测试通过。这是该版本的自动检查记录，不代替真机、性能或人工验收。
+CI 使用相同入口；远端合并阻断仍需分支规则配合，Jacoco/APK 体积为报告项。
 
-## 维护者
+## 工程结构
 
-目前是个人项目，`chengxianhe` 一个人维护，以 Codex 为主要开发助手；Claude 配置保留兼容。
-发现问题或者有想法，直接开 issue。
+```text
+app/                  应用入口、四 Tab 导航与依赖组装
+feature/library/      照片日流；后续相册/回忆共用的功能模块
+feature/home/         保留的权限与同步状态页面
+domain/               纯 Kotlin 实体、Repository 接口与 UseCase
+data/                 MediaStore、Room、同步与 Repository 实现
+core/                 设计系统、通用 UI、日志与公共能力
+build-logic/          Gradle 约定插件
+konsistTest/          架构与设计规范的机器断言
+benchmark*/           性能测试与基准目标应用
+platform/             独立知识与任务交付平台
+scripts/              统一验证入口与源码指纹工具
+docs/                 任务接续、架构、证据与工作流说明
+template/             可复用脚手架参考
+```
 
-## 协议
+依赖方向为 `app → feature → domain ← data`；feature 可依赖 core，禁止 feature 互相依赖或直接访问 data。
+UI 使用单向数据流，ViewModel 经 UseCase 访问业务逻辑，对外暴露 StateFlow；
+视觉 token 统一来自设计系统，用户文案使用字符串资源。
 
-[MIT License](LICENSE)——随便用、改、商用都行，保留版权声明就好。
+开发前阅读 [AGENTS.md](AGENTS.md)（指向 [CLAUDE.md](CLAUDE.md)）和
+[真实代码样板索引](docs/patterns/README.md)。自动检查由执行者完成，代码最终审查由用户负责，
+当前不默认启动独立模型审查。架构背景见 [工程搭建说明](docs/compose-ai-bootstrap-final.md)，
+历史记录中的旧流程以当前项目约定为准。
+
+## 维护与协议
+
+个人项目，由 `chengxianhe` 维护，以 Codex 为主要开发助手，保留 Claude 配置兼容。
+问题和建议欢迎提交 issue。[MIT License](LICENSE)。
