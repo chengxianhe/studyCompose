@@ -3,6 +3,8 @@ package com.study.cc.core.designsystem.theme
 import androidx.compose.ui.unit.dp
 
 object Sizes {
+    const val PHOTO_GRID_COLUMN_COUNT = 5
+
     // 照片日期滑块
     val dateScrubberTrackWidth = 2.dp
     val dateScrubberThumbSize = 24.dp
