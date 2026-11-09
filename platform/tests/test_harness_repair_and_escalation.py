@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from gate_fixtures import record_fixture_gate
+
 from govplatform.contract import service as contract_service
 from govplatform.contract.models import AcceptanceCriterion, VerificationCase, VerificationType
 from govplatform.harness import service as harness_service
@@ -31,9 +33,7 @@ def _frozen_contract(claude_code_agent: Agent, owner_human: Human) -> str:
 
 
 def _pass_entry_gate(run_id: str, caller: Agent) -> None:
-    harness_service.record_entry_gate(
-        run_id=run_id, caller=caller, passed=True, command="pytest", summary="ok"
-    )
+    record_fixture_gate(run_id=run_id, caller=caller, passed=True, command="pytest", summary="ok")
 
 
 def _fail_acceptance(run_id: str, caller: Agent) -> None:

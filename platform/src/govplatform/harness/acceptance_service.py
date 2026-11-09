@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 
 from govplatform.audit.models import AuditEvent
 from govplatform.audit.store import insert_audit_event
@@ -14,12 +15,24 @@ from govplatform.harness._shared import (
     now,
     principal_type_and_id,
 )
+from govplatform.harness.evidence_guard import validate_current
+from govplatform.harness.manual_results import merge_manual_results
 from govplatform.harness.models import AcceptanceResult, HarnessRun, HarnessStatus, RepairRound
-from govplatform.identity.models import Human, Principal, resolve_principal
+from govplatform.identity.models import (
+    Human,
+    Principal,
+    PrincipalNotAllowedError,
+    resolve_principal,
+)
 
 
 def record_acceptance(
-    *, run_id: str, caller: Principal, results: list[AcceptanceResult]
+    *,
+    run_id: str,
+    caller: Principal,
+    results: list[AcceptanceResult],
+    manual_only: bool = False,
+    expected_updated_at: datetime | None = None,
 ) -> HarnessRun:
     """记录一轮独立验收结果，内部判定整体通不通过：
 
@@ -41,18 +54,25 @@ def record_acceptance(
     """
     resolved = resolve_principal(caller)
     is_human_caller = isinstance(resolved, Human)
+    if manual_only and not is_human_caller:
+        raise PrincipalNotAllowedError("人工补审只允许 Human")
     moment = now()
     principal_type, principal_id, session_id = principal_type_and_id(resolved)
     with get_connection() as conn:
         existing = harness_store.get(conn, run_id)
         if existing is None:
             raise HarnessStateError(f"unknown run_id {run_id!r}")
+        if expected_updated_at is not None and existing.updated_at != expected_updated_at:
+            raise HarnessStateError("运行已变化，请刷新后重新审核")
         if existing.status not in (HarnessStatus.ACCEPTING, HarnessStatus.WAITING_FOR_HUMAN):
             raise HarnessStateError(
                 f"run_id {run_id!r} is {existing.status.value}，必须先通过入门禁才能记录验收结果"
             )
         contract = contract_service.get_without_audit(existing.contract_id)
         assert contract is not None  # frozen 契约不会被删
+        # Negative human feedback can reopen stale work; positive conclusions need fresh evidence.
+        if not (is_human_caller and results and all(not result.passed for result in results)):
+            validate_current(existing)
 
         ac_by_id = {ac.ac_id: ac for ac in contract.acceptance_criteria}
         all_ac_ids = set(ac_by_id)
@@ -67,15 +87,31 @@ def record_acceptance(
                 f"results 里同一条 AC 出现了不止一次，证据自相矛盾：{duplicate_ids}"
             )
 
+        stamped_results = [
+            r.model_copy(
+                update={
+                    "round_number": existing.repair_round,
+                    "recorded_by": resolved,
+                    "recorded_at": moment,
+                }
+            )
+            for r in results
+        ]
+        evaluated = (
+            merge_manual_results(existing, contract, stamped_results)
+            if manual_only
+            else stamped_results
+        )
+
         def _counts_as_passed(result: AcceptanceResult) -> bool:
             if not result.passed:
                 return False
             ac = ac_by_id[result.ac_id]
             if ac.verification_type == VerificationType.MANUAL_EVIDENCE:
-                return is_human_caller
+                return isinstance(result.recorded_by, Human)
             return True
 
-        passed_ac_ids = {r.ac_id for r in results if _counts_as_passed(r)}
+        passed_ac_ids = {r.ac_id for r in evaluated if _counts_as_passed(r)}
         waived_ac_ids = {
             ac_id
             for ac_id in all_ac_ids - passed_ac_ids
@@ -88,6 +124,9 @@ def record_acceptance(
             if ac_by_id[ac_id].verification_type == VerificationType.MANUAL_EVIDENCE
         }
         needs_repair_ids = set(unresolved) - needs_human_ids
+        # “尚未人工确认”和“人工明确验收失败”是两件事，后者需要修复。
+        if is_human_caller:
+            needs_repair_ids.update(r.ac_id for r in stamped_results if not r.passed)
 
         new_repair_round = existing.repair_round
         new_repair_rounds = existing.repair_rounds
@@ -119,9 +158,6 @@ def record_acceptance(
         # 上一轮具体哪条证据、谁提交的，只剩 repair_rounds 里那句粗略的
         # failure_summary，审计链就不完整了。这一批结果盖上当前轮次号后
         # 追加进去，不动之前轮次留下的记录。
-        stamped_results = [
-            r.model_copy(update={"round_number": existing.repair_round}) for r in results
-        ]
         updated = existing.model_copy(
             update={
                 "status": new_status,
@@ -132,7 +168,8 @@ def record_acceptance(
                 "updated_at": moment,
             }
         )
-        harness_store.update(conn, updated)
+        if not harness_store.update(conn, updated, expected_updated_at=existing.updated_at):
+            raise HarnessStateError("运行在验收期间已变化，请重新读取")
         insert_audit_event(
             conn,
             AuditEvent(

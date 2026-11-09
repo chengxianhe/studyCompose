@@ -237,6 +237,9 @@ def deprecate(*, knowledge_id: str, caller: Principal, reason: str) -> Knowledge
     resolved = resolve_principal(caller)
     if not isinstance(resolved, Human):
         raise PrincipalNotAllowedError("only a human owner can deprecate a knowledge object")
+    reason = reason.strip()
+    if not reason or len(reason) > 4000:
+        raise KnowledgeStateError("废弃理由必须是 1 至 4000 字")
     sensitive_reason = find_sensitive_reason(reason)
     if sensitive_reason is not None:
         raise SensitiveContentError(f"疑似包含敏感信息（{sensitive_reason}），拒绝记录")

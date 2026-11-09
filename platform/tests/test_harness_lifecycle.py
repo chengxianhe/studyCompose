@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from gate_fixtures import record_fixture_gate
 
 from govplatform.contract import service as contract_service
 from govplatform.contract.models import AcceptanceCriterion, VerificationCase, VerificationType
@@ -53,7 +54,7 @@ def test_full_lifecycle_pass_to_delivered(claude_code_agent: Agent, owner_human:
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
     assert run.status == HarnessStatus.DEVELOPING
 
-    failed_gate = harness_service.record_entry_gate(
+    failed_gate = record_fixture_gate(
         run_id=run.run_id,
         caller=claude_code_agent,
         passed=False,
@@ -62,7 +63,7 @@ def test_full_lifecycle_pass_to_delivered(claude_code_agent: Agent, owner_human:
     )
     assert failed_gate.status == HarnessStatus.DEVELOPING  # 没过，打回开发
 
-    passed_gate = harness_service.record_entry_gate(
+    passed_gate = record_fixture_gate(
         run_id=run.run_id,
         caller=claude_code_agent,
         passed=True,
@@ -132,7 +133,7 @@ def test_agent_cannot_self_pass_manual_evidence_ac(
     """
     contract_id = _frozen_contract_with_manual_evidence_ac(claude_code_agent, owner_human)
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
 
@@ -153,7 +154,7 @@ def test_agent_cannot_self_pass_manual_evidence_ac(
 def test_human_can_confirm_manual_evidence_ac(claude_code_agent: Agent, owner_human: Human) -> None:
     contract_id = _frozen_contract_with_manual_evidence_ac(claude_code_agent, owner_human)
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
 
@@ -172,7 +173,7 @@ def test_record_acceptance_rejects_unknown_ac_id(
 ) -> None:
     contract_id = _frozen_contract(claude_code_agent, owner_human)
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
     with pytest.raises(HarnessStateError):
@@ -195,7 +196,7 @@ def test_record_acceptance_rejects_duplicate_ac_id_in_one_batch(
     """
     contract_id = _frozen_contract(claude_code_agent, owner_human)
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
     with pytest.raises(HarnessStateError):
@@ -217,7 +218,7 @@ def test_human_can_resolve_waiting_for_human_without_rerunning_entry_gate(
     """
     contract_id = _frozen_contract_with_manual_evidence_ac(claude_code_agent, owner_human)
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
     waiting = harness_service.record_acceptance(

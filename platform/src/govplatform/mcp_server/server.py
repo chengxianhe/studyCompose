@@ -10,12 +10,35 @@ from govplatform.harness import service as harness_service
 from govplatform.harness.models import AcceptanceResult, HarnessRun
 from govplatform.identity.models import Principal
 from govplatform.knowledge import service as knowledge_service
-from govplatform.knowledge.models import AuthorityLevel, KnowledgeType
+from govplatform.knowledge.models import (
+    AuthorityLevel,
+    KnowledgeObject,
+    KnowledgeStatus,
+    KnowledgeType,
+)
+from govplatform.knowledge.query_service import KnowledgePage, get_knowledge, list_knowledge
 from govplatform.knowledge.service import ProposeResponse
 from govplatform.search import service as search_service
 from govplatform.search.service import SearchResponse
 
 mcp = MCPServer("govplatform")
+
+
+@mcp.tool(name="knowledge.list")
+async def knowledge_list(
+    caller: Principal,
+    status: KnowledgeStatus | None = KnowledgeStatus.IN_REVIEW,
+    offset: int = 0,
+    limit: int = 20,
+) -> KnowledgePage:
+    """浏览候选与有效知识；in_review 内容未经批准，不可作为生效规则。"""
+    return list_knowledge(caller=caller, status=status, offset=offset, limit=limit)
+
+
+@mcp.tool(name="knowledge.get")
+async def knowledge_get(knowledge_id: str, caller: Principal) -> KnowledgeObject | None:
+    """读取全文和状态；只有 active 且在有效期内的知识才生效。"""
+    return get_knowledge(knowledge_id=knowledge_id, caller=caller)
 
 
 @mcp.tool(name="knowledge.search")
@@ -123,6 +146,7 @@ async def contract_get(contract_id: str, caller: Principal) -> Contract | None:
 async def harness_record_entry_gate(
     run_id: str, caller: Principal, passed: bool, command: str, summary: str
 ) -> HarnessRun:
+    """需先 delivery prepare；summary 必须为真实 VerificationEvidence JSON，不接受自报通过。"""
     return harness_service.record_entry_gate(
         run_id=run_id, caller=caller, passed=passed, command=command, summary=summary
     )

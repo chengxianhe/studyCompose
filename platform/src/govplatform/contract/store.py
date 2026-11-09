@@ -32,10 +32,10 @@ def insert(conn: sqlite3.Connection, contract: Contract) -> None:
 def update(
     conn: sqlite3.Connection, contract: Contract, *, expected_version: int | None = None
 ) -> bool:
-    """写回一份契约。`expected_version` 不传时（`freeze()` 走这条路）无条件按
+    """写回一份契约。`expected_version` 不传时无条件按
     contract_id 覆盖，跟原来行为一致。
 
-    传了的话（`contract_service.update()` 走这条路），WHERE 子句里带上
+    update()/freeze() 都必须传版本，WHERE 子句同时要求仍是 draft，并带上
     `AND version = ?`，让"版本没被人抢先改过"这个检查和真正写入变成同一条
     SQL 语句、同一个事务——`contract_service.update()` 之前是先在 Python
     里读一次当前版本、判断通过后再单独发一条不带版本条件的 UPDATE，这两步
@@ -66,7 +66,7 @@ def update(
             test_cases_json = ?, knowledge_refs_json = ?,
             knowledge_snapshots_json = ?, risks_json = ?, open_questions_json = ?,
             frozen_by = ?, frozen_at = ?, created_at = ?, updated_at = ?
-        WHERE contract_id = ? AND version = ?
+        WHERE contract_id = ? AND version = ? AND status = 'draft'
         """,
         (*_params(contract)[1:], contract.contract_id, expected_version),
     )

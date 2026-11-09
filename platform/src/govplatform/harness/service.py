@@ -23,6 +23,7 @@ from govplatform.harness._shared import HarnessStateError as HarnessStateError
 from govplatform.harness._shared import now as _now
 from govplatform.harness._shared import principal_type_and_id as _principal_type_and_id
 from govplatform.harness.acceptance_service import record_acceptance as record_acceptance
+from govplatform.harness.evidence_guard import validate_current, validate_gate
 from govplatform.harness.models import GateResult, HarnessRun, HarnessStatus
 from govplatform.identity.models import (
     Human,
@@ -73,6 +74,15 @@ def start(*, contract_id: str, caller: Principal) -> HarnessRun:
         updated_at=moment,
     )
     with get_connection() as conn:
+        # 启动检查与插入同一事务，刷新页面/并发请求也不会开出两条活动运行。
+        conn.execute("BEGIN IMMEDIATE")
+        active = conn.execute(
+            "SELECT run_id FROM harness_runs WHERE contract_id = ? "
+            "AND status NOT IN ('delivered', 'escalated', 'cancelled') LIMIT 1",
+            (contract_id,),
+        ).fetchone()
+        if active is not None:
+            raise HarnessStateError(f"已有进行中的运行 {active[0]}，请继续或由用户取消它")
         harness_store.insert(conn, run)
         insert_audit_event(
             conn,
@@ -108,6 +118,7 @@ def record_entry_gate(
             raise HarnessStateError(
                 f"run_id {run_id!r} is {existing.status.value}，entry gate 只能在开发/修复中记录"
             )
+        validate_gate(existing, passed, command, summary)
         gate_result = GateResult(
             passed=passed, command=command, summary=summary, recorded_at=moment
         )
@@ -119,7 +130,8 @@ def record_entry_gate(
                 "updated_at": moment,
             }
         )
-        harness_store.update(conn, updated)
+        if not harness_store.update(conn, updated, expected_updated_at=existing.updated_at):
+            raise HarnessStateError("运行在记录门禁期间已变化，请重新读取")
         insert_audit_event(
             conn,
             AuditEvent(
@@ -155,6 +167,7 @@ def deliver(*, run_id: str, caller: Principal) -> HarnessRun:
             raise HarnessStateError(
                 f"run_id {run_id!r} is {existing.status.value}, only passed runs can be delivered"
             )
+        validate_current(existing)
         updated = existing.model_copy(
             update={
                 "status": HarnessStatus.DELIVERED,
@@ -162,7 +175,8 @@ def deliver(*, run_id: str, caller: Principal) -> HarnessRun:
                 "updated_at": moment,
             }
         )
-        harness_store.update(conn, updated)
+        if not harness_store.update(conn, updated, expected_updated_at=existing.updated_at):
+            raise HarnessStateError("运行在确认交付期间已变化，请重新读取")
         insert_audit_event(
             conn,
             AuditEvent(

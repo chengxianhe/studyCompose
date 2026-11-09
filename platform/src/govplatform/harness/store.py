@@ -27,18 +27,24 @@ def insert(conn: sqlite3.Connection, run: HarnessRun) -> None:
     )
 
 
-def update(conn: sqlite3.Connection, run: HarnessRun) -> None:
-    conn.execute(
+def update(
+    conn: sqlite3.Connection,
+    run: HarnessRun,
+    *,
+    expected_updated_at: datetime,
+) -> bool:
+    cursor = conn.execute(
         """
         UPDATE harness_runs SET
             contract_id = ?, status = ?, repair_round = ?,
             entry_gate_results_json = ?, acceptance_results_json = ?,
             repair_rounds_json = ?, escalation_reason = ?, started_by = ?,
             created_at = ?, updated_at = ?, delivered_at = ?
-        WHERE run_id = ?
+        WHERE run_id = ? AND updated_at = ?
         """,
-        (*_params(run)[1:], run.run_id),
+        (*_params(run)[1:], run.run_id, expected_updated_at.isoformat()),
     )
+    return cursor.rowcount == 1
 
 
 def get(conn: sqlite3.Connection, run_id: str) -> HarnessRun | None:

@@ -6,6 +6,7 @@ from govplatform.audit.models import AuditEvent
 from govplatform.audit.store import insert_audit_event
 from govplatform.contract import store as contract_store
 from govplatform.contract._shared import (
+    ContractConflictError,
     ContractStateError,
     get_without_audit,
     now,
@@ -101,7 +102,12 @@ def _validation_errors(contract: Contract) -> tuple[list[str], list[KnowledgeSna
     return errors, snapshots
 
 
-def freeze(*, contract_id: str, caller: Principal) -> Contract:
+def freeze(
+    *,
+    contract_id: str,
+    caller: Principal,
+    expected_version: int | None = None,
+) -> Contract:
     resolved = resolve_principal(caller)
     if not isinstance(resolved, Human):
         raise PrincipalNotAllowedError("only a human owner can freeze a contract")
@@ -113,6 +119,8 @@ def freeze(*, contract_id: str, caller: Principal) -> Contract:
         raise ContractStateError(f"unknown contract_id {contract_id!r}")
     if existing.status != ContractStatus.DRAFT:
         raise ContractStateError(f"contract_id {contract_id!r} is already {existing.status.value}")
+    if expected_version is not None and existing.version != expected_version:
+        raise ContractConflictError("契约已变更，请重新阅读后冻结")
 
     errors, snapshots = _validation_errors(existing)
     if errors:
@@ -148,7 +156,8 @@ def freeze(*, contract_id: str, caller: Principal) -> Contract:
         }
     )
     with get_connection() as conn:
-        contract_store.update(conn, frozen)
+        if not contract_store.update(conn, frozen, expected_version=existing.version):
+            raise ContractConflictError("契约在审核期间已变更，请重新阅读后冻结")
         insert_audit_event(
             conn,
             AuditEvent(

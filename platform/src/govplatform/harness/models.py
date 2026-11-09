@@ -5,6 +5,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from govplatform.identity.models import Principal
+
 
 class HarnessStatus(StrEnum):
     DEVELOPING = "developing"
@@ -18,6 +20,7 @@ class HarnessStatus(StrEnum):
     PASSED = "passed"
     DELIVERED = "delivered"
     ESCALATED = "escalated"
+    CANCELLED = "cancelled"
 
 
 class GateResult(BaseModel):
@@ -41,6 +44,8 @@ class AcceptanceResult(BaseModel):
     # 轮"），需要能分清楚每条证据属于哪一轮，不然多轮之后没法回溯"当时
     # 到底提交了什么证据"。
     round_number: int = 0
+    # 服务端盖章；旧记录无该字段时保持未知，不推断为 Human。
+    recorded_by: Principal | None = None
 
 
 class RepairRound(BaseModel):

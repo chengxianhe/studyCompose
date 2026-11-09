@@ -49,6 +49,7 @@ class UpdateContractRequest(BaseModel):
 
 class FreezeContractRequest(BaseModel):
     caller: Principal
+    expected_version: int | None = None
 
 
 class GetContractRequest(BaseModel):
@@ -114,7 +115,13 @@ def update_contract(contract_id: str, request: UpdateContractRequest) -> Contrac
 @router.post("/{contract_id}/freeze", response_model=Contract)
 def freeze_contract(contract_id: str, request: FreezeContractRequest) -> Contract:
     try:
-        return contract_service.freeze(contract_id=contract_id, caller=request.caller)
+        return contract_service.freeze(
+            contract_id=contract_id,
+            caller=request.caller,
+            expected_version=request.expected_version,
+        )
+    except ContractConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except PrincipalNotAllowedError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ContractStateError as exc:

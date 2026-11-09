@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from gate_fixtures import record_fixture_gate
 
 from govplatform.contract import service as contract_service
 from govplatform.contract.models import AcceptanceCriterion, VerificationCase, VerificationType
@@ -64,7 +65,7 @@ def test_valid_waiver_lets_acceptance_pass_despite_failure(
     )
 
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
     accepted = harness_service.record_acceptance(
@@ -121,7 +122,7 @@ def test_expired_waiver_does_not_cover_the_ac(claude_code_agent: Agent, owner_hu
     )
 
     run = harness_service.start(contract_id=contract_id, caller=owner_human)
-    harness_service.record_entry_gate(
+    record_fixture_gate(
         run_id=run.run_id, caller=claude_code_agent, passed=True, command="pytest", summary="ok"
     )
     # 验收发生在豁免过期之后（模拟"当时批的时候没过期，用的时候已经过期

@@ -6,11 +6,17 @@ from rank_bm25 import BM25Okapi
 
 from govplatform.knowledge.models import KnowledgeObject
 
-_TOKEN_RE = re.compile(r"[a-zA-Z0-9_一-鿿]+")
+_TOKEN_RE = re.compile(r"[a-zA-Z0-9_]+|[一-鿿]+")
 
 
 def tokenize(text: str) -> list[str]:
-    return _TOKEN_RE.findall(text.lower())
+    tokens: list[str] = []
+    for word in _TOKEN_RE.findall(text.lower()):
+        if "一" <= word[0] <= "鿿" and len(word) > 1:
+            tokens.extend(word[index : index + 2] for index in range(len(word) - 1))
+        else:
+            tokens.append(word)
+    return tokens
 
 
 class BM25Corpus:
@@ -18,7 +24,7 @@ class BM25Corpus:
         self._objects = objects
         corpus = [tokenize(f"{obj.title} {obj.title} {obj.body}") for obj in objects]
         self._doc_tokens = [set(tokens) for tokens in corpus]
-        self._bm25: BM25Okapi | None = BM25Okapi(corpus) if corpus else None
+        self._bm25: BM25Okapi | None = BM25Okapi(corpus) if any(corpus) else None
 
     def query(self, text: str, limit: int) -> list[tuple[KnowledgeObject, float]]:
         if self._bm25 is None:
