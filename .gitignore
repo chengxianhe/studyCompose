@@ -31,3 +31,9 @@ platform/.data/
 
 # Claude 自检成功戳记（仅本地缓存）
 .claude/.self-check-passed
+
+# Local verification logs and review evidence; task notes keep the durable summary.
+/.verification/
+
+# Local in-memory search index session markers.
+:memory:.ses

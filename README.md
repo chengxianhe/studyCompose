@@ -26,11 +26,11 @@ CLAUDE.md / AGENTS.md                   AI 协作硬规则（后者是前者的�
 ### Android 部分
 
 ```bash
-./gradlew :app:assembleDebug
-./gradlew :konsistTest:test detekt lint test   # 提交前的自检要求
+bash scripts/verify.sh android  # 完整门禁 + debug APK 构建
 ```
 
-- 开工前先读 `CLAUDE.md`——架构分层、设计系统 token、日志规范这些硬规则都在这里，
+- 工作流与独立模型回归见 [docs/workflow.md](docs/workflow.md)，当前任务见 `TASKS.md`。
+- 开工前先读 `AGENTS.md`（链接到 `CLAUDE.md`）——架构分层、设计系统 token、日志规范这些硬规则都在这里，
   违反了 CI 会红。
 - 具体场景该怎么写，先查 `docs/patterns/README.md` 找对应索引再动手。
 - 想了解这套脚手架是怎么从零搭起来的，看 `docs/compose-ai-bootstrap-final.md`；
@@ -39,9 +39,7 @@ CLAUDE.md / AGENTS.md                   AI 协作硬规则（后者是前者的�
 ### `platform/`（AI 知识治理原型）
 
 ```bash
-cd platform
-uv sync --locked
-uv run pytest
+bash scripts/verify.sh platform
 ```
 
 - 通过 MCP 暴露 `knowledge.search` / `knowledge.propose` 两个工具，配置写在仓库根目录
@@ -54,12 +52,11 @@ uv run pytest
 
 ## 现在是什么状态，别高估
 
-- Android 侧：三级 CI 门禁在跑（detekt/Konsist 硬性拦截、Spotless/Dependency Guard
-  软性提示、Jacoco/APK 体积仅报告），具体分级见 `.github/workflows/ci.yml`。
-- `platform/` 侧：阶段0/1 的最小闭环（提交知识 → 人工审核 → 检索到）已经跑通，
-  也已经接入 Claude Code 和 Codex 的真实会话——但**库里目前还没有真实积累的知识
-  条目**。这是一个刚起步的原型，不是成熟系统，原方案里"交付契约""Harness 三轮
-  修复"那些更大的部分完全没做，也不会因为这份 README 存在就自动去做。
+- Android 侧：Konsist、detekt、lint、单测、Spotless、Dependency Guard 与 debug APK 构建全部必过；
+  Jacoco/APK 体积仅报告。远端合并阻断还需配置分支规则，不能仅凭 YAML 宣称已强制。
+- `platform/` 侧：知识审核检索、交付契约、Harness 状态追踪已在 T-P0～T-P8 实现；
+  这仍是原型，真实任务全流程验收尚未完成，见 `docs/tasks/completed-platform.md`。
+- 当前业务为本地相册；进度、既有未提交实现和未验收性能目标以 `TASKS.md` 及任务接续记录为准。
 
 ## 维护计划
 
@@ -76,16 +73,14 @@ uv run pytest
 
 **`platform/` 侧的路线图**（细节见 baseline 文档 §6）：
 
-- 当前：阶段0/1 已收尾，接下来是等真实使用数据积累，而不是自动往"阶段2"
-  （交付契约 `contract.*`、Harness 状态机、三轮修复）推进——那需要重新过一遍
-  决策确认，不是这份骨架的自然延伸。
+- 当前：阶段0～3 的原型能力已有归档；下一步按用户明确任务验证真实使用，不自行扩建治理系统。
 - 已知但暂不处理的技术债：审计日志 90 天保留目标还没有清理任务（数据量小，
   不着急）；现在只支持单个工程独享一份知识库，多个工程共享需要先补上"空间"
   隔离概念（原方案 §5，阶段0故意没做），不是简单改改配置就行。
 
 ## 维护者
 
-目前是个人项目，`chengxianhe` 一个人维护，用 Claude Code / Codex 辅助开发。
+目前是个人项目，`chengxianhe` 一个人维护，以 Codex 为主要开发助手；Claude 配置保留兼容。
 发现问题或者有想法，直接开 issue。
 
 ## 协议

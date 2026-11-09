@@ -1,5 +1,8 @@
 # Compose 多模块脚手架模板
 
+> 历史参考快照：当前 studyCompose 执行规则以根目录 AGENTS.md、docs/workflow.md 和 scripts/verify.sh 为准。
+> 使用本模板创建新项目时，需显式对齐验证入口与 CI；本文件不代表当前工作流。
+
 从 `studyCompose` 项目里原样抠出来的、和具体业务无关的部分：build-logic 约定插件、
 `:domain :data :core:common :core:logging :core:designsystem :core:ui :feature:home :konsistTest`
 模块骨架、detekt/Spotless/Konsist/Dependency Guard 配置、hooks、CI、流程文档。

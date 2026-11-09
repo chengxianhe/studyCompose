@@ -2,9 +2,9 @@ name: Platform CI
 
 on:
   push:
-    paths: ["platform/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
+    paths: ["platform/**", "scripts/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
   pull_request:
-    paths: ["platform/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
+    paths: ["platform/**", "scripts/**", ".mcp.json", ".github/workflows/platform-ci.yml"]
 
 jobs:
   hard:
@@ -17,15 +17,15 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"
-      - name: Validate .mcp.json is well-formed JSON
+      - name: Verify platform
         working-directory: .
-        run: python3 -c "import json; json.load(open('.mcp.json'))"
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run mypy --strict src tests
-      - run: uv run pytest
-      - name: Smoke-test the MCP server entry point imports cleanly
-        run: uv run python -c "import govplatform.mcp_server.server"
+        run: bash scripts/verify.sh platform
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: platform-verification
+          path: .verification/
+          include-hidden-files: true
 
   soft:
     runs-on: ubuntu-latest

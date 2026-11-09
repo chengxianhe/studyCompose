@@ -33,11 +33,11 @@
 ```
 
 结果 JSON 在 `benchmark/build/outputs/connected_android_test_additional_output/` 下。
-标准自检命令（`./gradlew :konsistTest:test detekt lint test spotlessCheck :app:dependencyGuard`）不包含这些设备测试。
+标准自检入口 `bash scripts/verify.sh android` 不包含这些设备测试。
 
 ## 约定
 
 - 常量与 `:benchmark-target` 的 `BenchMode` / `strings.xml` 对应（见 `BenchmarkTarget.kt`），改动时两边同步。
-- 占位网格不加载缩略图：只度量「数据路径 + 布局」。解码开销留给 T-014 用真实图片测。
-- 原型 schema 与 T-012 的真实 schema 不共享代码；T-012 完成后须用真实 schema 重跑。
+- 占位网格不加载缩略图：只度量「数据路径 + 布局」。真实 T-014 日流的解码、远距跳转和未知桶性能由 T-012b 统一验收。
+- 原型 schema 与 T-012 的真实 schema 不共享代码；T-012b 须用真实 schema 重跑。
 - 基线数字只代表所用设备，换设备要重测。

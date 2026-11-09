@@ -1,5 +1,8 @@
 # Compose 新工程 · AI 协作完整搭建包
 
+> 历史参考快照：当前 studyCompose 执行规则以根目录 AGENTS.md、docs/workflow.md 和 scripts/verify.sh 为准。
+> 使用本模板创建新项目时，需显式对齐验证入口与 CI；本文件不代表当前工作流。
+
 > 最终整合版。前面几份文件的内容都收在这里，按落地顺序组织。
 > 用法：按第 0 节的顺序做，中间的大段内容是贴给 Claude Code 或直接建文件用的。
 

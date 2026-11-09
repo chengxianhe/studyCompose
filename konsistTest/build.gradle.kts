@@ -5,6 +5,7 @@ plugins {
 dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.konsist)
+    testImplementation(libs.kotlin.compiler.embeddable)
 }
 
 // Konsist 在运行时扫描整个项目的源码文件，而不仅仅是本模块声明的输入，

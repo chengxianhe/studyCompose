@@ -31,11 +31,11 @@ Documents under `docs/` and the rule files are written in Chinese.
 ### Android part
 
 ```bash
-./gradlew :app:assembleDebug
-./gradlew :konsistTest:test detekt lint test   # self-check required before committing
+bash scripts/verify.sh android  # full gates and debug APK build
 ```
 
-- Read `CLAUDE.md` first. Layering, design-system tokens and logging rules are
+- See [docs/workflow.md](docs/workflow.md) for the workflow and independent model review; `TASKS.md` tracks active work.
+- Read `AGENTS.md` (linked to `CLAUDE.md`) first. Layering, design-system tokens and logging rules are
   hard rules there; violating them turns CI red.
 - For how to write a specific kind of feature, look it up in
   `docs/patterns/README.md` and follow the real code it points to.
@@ -46,9 +46,7 @@ Documents under `docs/` and the rule files are written in Chinese.
 ### `platform/` (AI knowledge-governance prototype)
 
 ```bash
-cd platform
-uv sync --locked
-uv run pytest
+bash scripts/verify.sh platform
 ```
 
 - It exposes two MCP tools, `knowledge.search` and `knowledge.propose`, configured
@@ -63,15 +61,13 @@ uv run pytest
 
 ## Current status — don't overestimate it
 
-- Android side: a three-tier CI gate is running (detekt/Konsist block merges;
-  Spotless/Dependency Guard warn; Jacoco/APK size are report-only). See
-  `.github/workflows/ci.yml`.
-- `platform/` side: the minimal loop of phases 0/1 (propose knowledge → human
-  review → searchable) works and is wired into real Claude Code and Codex
-  sessions, but **the knowledge base does not yet hold real accumulated
-  entries**. This is an early prototype, not a mature system. The larger parts of
-  the original proposal (delivery contracts, a three-round repair harness) are not
-  built, and will not be built just because this README exists.
+- Android: Konsist, detekt, lint, tests, Spotless, Dependency Guard and debug APK builds must pass.
+  Jacoco/APK size remain advisory. Remote merge blocking also requires branch rules; YAML alone is not proof.
+- `platform/`: knowledge approval/search, delivery contracts and Harness state tracking were implemented
+  in T-P0–T-P8. This remains a prototype; a real task has not yet completed end-to-end acceptance.
+  See `docs/tasks/completed-platform.md`.
+- The app now targets local photo management. `TASKS.md` and task handoff notes record progress,
+  existing uncommitted work and outstanding performance acceptance.
 
 ## Maintenance plan
 
@@ -88,9 +84,7 @@ machine-checkable → upgrade to a Konsist / detekt / hook assertion, then delet
 
 **`platform/` roadmap** (details in §6 of the baseline document):
 
-- Now: phases 0/1 are wrapped up. Next is waiting for real usage data, not
-  automatically moving to phase 2 (contracts, harness state machine, three-round
-  repair), which needs a fresh round of decision review.
+- Now: phase 0–3 prototype work is archived. Validate real usage when explicitly tasked; do not expand governance automatically.
 - Known debt, deliberately deferred: no cleanup job yet for the 90-day audit-log
   retention target (data volume is small); only one project can own a knowledge
   base today, and sharing it across projects needs a "space" isolation concept
@@ -98,8 +92,8 @@ machine-checkable → upgrade to a Konsist / detekt / hook assertion, then delet
 
 ## Maintainer
 
-A personal project maintained by `chengxianhe`, developed with Claude Code and
-Codex. Found a problem or have an idea? Open an issue.
+A personal project maintained by `chengxianhe`, primarily developed with Codex.
+Claude configuration is retained for compatibility. Found a problem or have an idea? Open an issue.
 
 ## License
 

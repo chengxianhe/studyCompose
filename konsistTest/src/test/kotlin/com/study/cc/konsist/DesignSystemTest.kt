@@ -54,7 +54,7 @@ class DesignSystemTest {
 
     @Test
     fun `禁止硬编码中文字符串`() {
-        val violations = scopedFiles.filter { it.text.contains(Regex(""""[^"]*[一-龥]+[^"]*"""")) }
+        val violations = scopedFiles.filter { containsChineseStringLiteral(it.text) }
         assertTrue(
             "以下文件存在硬编码中文，请使用 stringResource: ${violations.map { it.path }}",
             violations.isEmpty(),
