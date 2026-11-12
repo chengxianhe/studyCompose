@@ -14,7 +14,6 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from govplatform.backup import create_backup
 from govplatform.config import OWNER_HUMAN_ID, db_path
 from govplatform.contract import service as contracts
-from govplatform.contract.models import ContractStatus
 from govplatform.harness import service as harness
 from govplatform.harness.cancellation_service import cancel
 from govplatform.harness.models import HarnessRun, HarnessStatus
@@ -24,6 +23,8 @@ from govplatform.knowledge.models import KnowledgeStatus
 from govplatform.knowledge.query_service import get_knowledge, list_knowledge
 from govplatform.review.acceptance import acceptance_form, parse_results
 from govplatform.review.catalog import task_catalog
+from govplatform.review.graph import register_graph_routes
+from govplatform.review.task_controls import task_controls
 from govplatform.review.tickets import FormTickets
 from govplatform.review.views import detail, document, fingerprint, form
 
@@ -35,6 +36,7 @@ def create_review_app() -> FastAPI:
     token = secrets.token_urlsafe(32)
     owner = Human(id=OWNER_HUMAN_ID)
     tickets = FormTickets()
+    register_graph_routes(app, owner, token, tickets)
 
     @app.middleware("http")
     async def local_only(
@@ -112,20 +114,13 @@ def create_review_app() -> FastAPI:
         )
         for contract in contract_list:
             content += f"<article><h2>{escape(contract.title)}</h2>{detail(contract)}"
-            action = "freeze" if contract.status == ContractStatus.DRAFT else "start"
-            label = "我已确认范围，冻结契约" if action == "freeze" else "开始一次运行"
-            content += form(
-                f"/actions/{action}/{contract.contract_id}",
-                label,
-                token,
-                contract,
-                tickets,
-            )
+            content += task_controls(contract, runs, token, tickets)
             content += "</article>"
         for run in runs:
             contract = next(c for c in contract_list if c.contract_id == run.contract_id)
             content += (
-                f"<article><h2>{escape(contract.title)} · {run.status.value}</h2>"
+                f'<article id="run-{run.run_id}">'
+                f"<h2>{escape(contract.title)} · {run.status.value}</h2>"
                 f"<p>运行 ID：{run.run_id}</p>{detail(run)}"
             )
             if run.status in (HarnessStatus.ACCEPTING, HarnessStatus.WAITING_FOR_HUMAN):

@@ -1,0 +1,1062 @@
+{
+  "dataset_version": "retrieval-v1",
+  "dataset_sha256": "0eb9a4b7593a165a3a1cf36896a24145c91dd9ebde8604c29ecff2692a0e98f3",
+  "label_status": "draft",
+  "code_sha256": "5213a523e7cf1f9bb4f11c84c83b6b94851aef9df5d8e48a0eee35c875207054",
+  "configuration": {
+    "embedding": "BAAI/bge-small-zh-v1.5",
+    "embedding_revision": "46fbe35fd4374a00fee7de77dfddaeb6dd6a2c59",
+    "reranker": "BAAI/bge-reranker-base",
+    "reranker_revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+    "limit": 10,
+    "attempt": 2,
+    "offline": true
+  },
+  "backends": [
+    {
+      "requested_backend": "sqlite",
+      "setup_ms": 206.214,
+      "warmup_ms": 2.923,
+      "results": [
+        {
+          "id": "q01",
+          "group": "chinese",
+          "query": "新项目 v2 应调用哪个接口？",
+          "expected": [
+            "api-current"
+          ],
+          "ranked": [
+            "api-current",
+            "api-legacy",
+            "offline-models",
+            "backup",
+            "chinese-tokens",
+            "payment-current",
+            "travel-current",
+            "expenses-en",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 2.851,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q02",
+          "group": "chinese",
+          "query": "付款前要谁批准，能口头同意吗？",
+          "expected": [
+            "payment-current"
+          ],
+          "ranked": [
+            "payment-current",
+            "expenses",
+            "expenses-en",
+            "api-current",
+            "api-legacy",
+            "backup",
+            "travel-current",
+            "offline-models",
+            "chinese-tokens"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 4.302,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q03",
+          "group": "chinese",
+          "query": "断网前后怎样检查知识检索模型是否完整？",
+          "expected": [
+            "offline-models"
+          ],
+          "ranked": [
+            "offline-models",
+            "backup",
+            "chinese-tokens",
+            "api-legacy",
+            "api-current",
+            "payment-current",
+            "expenses",
+            "travel-current",
+            "expenses-en"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.946,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q04",
+          "group": "chinese",
+          "query": "短语怎么匹配一段很长的中文，BM25 应该怎样分词？",
+          "expected": [
+            "chinese-tokens"
+          ],
+          "ranked": [
+            "chinese-tokens",
+            "offline-models",
+            "api-current",
+            "api-legacy",
+            "backup",
+            "expenses-en",
+            "travel-current",
+            "payment-current",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 4.925,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q05",
+          "group": "chinese",
+          "query": "申请费用报销要附上什么凭证？",
+          "expected": [
+            "expenses"
+          ],
+          "ranked": [
+            "expenses",
+            "travel-current",
+            "payment-current",
+            "backup",
+            "offline-models",
+            "expenses-en",
+            "chinese-tokens",
+            "api-legacy",
+            "api-current"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.0,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q06",
+          "group": "chinese",
+          "query": "恢复数据时如何避免覆盖正在使用的数据库？",
+          "expected": [
+            "backup"
+          ],
+          "ranked": [
+            "backup",
+            "api-legacy",
+            "chinese-tokens",
+            "offline-models",
+            "api-current",
+            "payment-current",
+            "expenses-en",
+            "expenses",
+            "travel-current"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.512,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q07",
+          "group": "english",
+          "query": "How many days after payment may employees submit reimbursement receipts?",
+          "expected": [
+            "expenses-en",
+            "expenses"
+          ],
+          "ranked": [
+            "expenses-en",
+            "payment-current",
+            "travel-current",
+            "expenses",
+            "api-legacy",
+            "offline-models",
+            "backup",
+            "chinese-tokens",
+            "api-current"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.712,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q08",
+          "group": "english",
+          "query": "How should local retrieval models be checked without an internet connection?",
+          "expected": [
+            "offline-models"
+          ],
+          "ranked": [
+            "expenses-en",
+            "offline-models",
+            "api-legacy",
+            "chinese-tokens",
+            "api-current",
+            "backup",
+            "payment-current",
+            "travel-current",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.289,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 0.5,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q09",
+          "group": "english",
+          "query": "How do I restore a database safely without overwriting the live file?",
+          "expected": [
+            "backup"
+          ],
+          "ranked": [
+            "expenses-en",
+            "api-legacy",
+            "api-current",
+            "backup",
+            "offline-models",
+            "chinese-tokens",
+            "payment-current",
+            "expenses",
+            "travel-current"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.527,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 0.25,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q10",
+          "group": "english",
+          "query": "Which API should a new version 2 project call?",
+          "expected": [
+            "api-current"
+          ],
+          "ranked": [
+            "api-current",
+            "api-legacy",
+            "expenses-en",
+            "chinese-tokens",
+            "offline-models",
+            "payment-current",
+            "backup",
+            "travel-current",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 2.776,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q11",
+          "group": "updates",
+          "query": "还没升级的 v1 旧项目应该继续调用哪个 API？",
+          "expected": [
+            "api-legacy"
+          ],
+          "ranked": [
+            "api-legacy",
+            "api-current",
+            "offline-models",
+            "backup",
+            "chinese-tokens",
+            "travel-current",
+            "expenses-en",
+            "payment-current",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.643,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q12",
+          "group": "updates",
+          "query": "现在差旅每天餐饮补助额度是多少？",
+          "expected": [
+            "travel-current"
+          ],
+          "ranked": [
+            "travel-current",
+            "expenses-en",
+            "expenses",
+            "offline-models",
+            "payment-current",
+            "chinese-tokens",
+            "api-legacy",
+            "backup",
+            "api-current"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.412,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q13",
+          "group": "updates",
+          "query": "旧口头付款批准流程被撤销后，现在需要怎样审批？",
+          "expected": [
+            "payment-current"
+          ],
+          "ranked": [
+            "payment-current",
+            "expenses",
+            "offline-models",
+            "backup",
+            "api-current",
+            "api-legacy",
+            "expenses-en",
+            "travel-current",
+            "chinese-tokens"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 4.596,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q14",
+          "group": "unanswerable",
+          "query": "如何烘焙巧克力蛋糕，需要多少面粉？",
+          "expected": [],
+          "ranked": [
+            "expenses",
+            "payment-current",
+            "travel-current",
+            "offline-models",
+            "expenses-en",
+            "chinese-tokens",
+            "api-current",
+            "api-legacy",
+            "backup"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.954,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q15",
+          "group": "unanswerable",
+          "query": "提交报销申请的网站具体 URL 是什么？",
+          "expected": [],
+          "ranked": [
+            "expenses",
+            "travel-current",
+            "offline-models",
+            "api-current",
+            "backup",
+            "payment-current",
+            "api-legacy",
+            "expenses-en",
+            "chinese-tokens"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.678,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q16",
+          "group": "unanswerable",
+          "query": "API v3 每秒的具体限流数字是多少？",
+          "expected": [],
+          "ranked": [
+            "api-current",
+            "chinese-tokens",
+            "api-legacy",
+            "travel-current",
+            "backup",
+            "offline-models",
+            "expenses-en",
+            "payment-current",
+            "expenses"
+          ],
+          "status": "ok",
+          "backend": "sqlite_fallback",
+          "mode": "hybrid",
+          "grade": "unavailable",
+          "elapsed_ms": 3.468,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        }
+      ],
+      "metrics": {
+        "total_cases": 16,
+        "positive_cases": 13,
+        "scored_positive_cases": 13,
+        "mean_recall_at_5": 1.0,
+        "mean_mrr_at_10": 0.9038461538461539,
+        "unanswerable_cases": 3,
+        "graded_unanswerable_cases": 0,
+        "unanswerable_false_passes": null,
+        "unanswerable_correct": null,
+        "failed_or_degraded_cases": 0,
+        "lifecycle_violations": 0,
+        "mean_query_ms": 3.6619375
+      },
+      "group_metrics": {
+        "chinese": {
+          "total_cases": 6,
+          "positive_cases": 6,
+          "scored_positive_cases": 6,
+          "mean_recall_at_5": 1.0,
+          "mean_mrr_at_10": 1.0,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 3.7560000000000002
+        },
+        "english": {
+          "total_cases": 4,
+          "positive_cases": 4,
+          "scored_positive_cases": 4,
+          "mean_recall_at_5": 1.0,
+          "mean_mrr_at_10": 0.6875,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 3.326
+        },
+        "unanswerable": {
+          "total_cases": 3,
+          "positive_cases": 0,
+          "scored_positive_cases": 0,
+          "mean_recall_at_5": null,
+          "mean_mrr_at_10": null,
+          "unanswerable_cases": 3,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 3.6999999999999997
+        },
+        "updates": {
+          "total_cases": 3,
+          "positive_cases": 3,
+          "scored_positive_cases": 3,
+          "mean_recall_at_5": 1.0,
+          "mean_mrr_at_10": 1.0,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 3.8836666666666666
+        }
+      },
+      "error_type": null
+    },
+    {
+      "requested_backend": "elasticsearch",
+      "setup_ms": 1257.773,
+      "warmup_ms": 2058.646,
+      "results": [
+        {
+          "id": "q01",
+          "group": "chinese",
+          "query": "新项目 v2 应调用哪个接口？",
+          "expected": [
+            "api-current"
+          ],
+          "ranked": [
+            "api-current",
+            "api-legacy",
+            "offline-models",
+            "backup",
+            "expenses-en",
+            "expenses",
+            "travel-current",
+            "chinese-tokens",
+            "payment-current"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 635.461,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q02",
+          "group": "chinese",
+          "query": "付款前要谁批准，能口头同意吗？",
+          "expected": [
+            "payment-current"
+          ],
+          "ranked": [
+            "payment-current",
+            "expenses-en",
+            "expenses",
+            "chinese-tokens",
+            "api-legacy",
+            "travel-current",
+            "offline-models",
+            "api-current",
+            "backup"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 484.847,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q03",
+          "group": "chinese",
+          "query": "断网前后怎样检查知识检索模型是否完整？",
+          "expected": [
+            "offline-models"
+          ],
+          "ranked": [
+            "offline-models",
+            "backup",
+            "api-legacy",
+            "expenses-en",
+            "api-current",
+            "payment-current",
+            "travel-current",
+            "expenses",
+            "chinese-tokens"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 495.702,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q04",
+          "group": "chinese",
+          "query": "短语怎么匹配一段很长的中文，BM25 应该怎样分词？",
+          "expected": [
+            "chinese-tokens"
+          ],
+          "ranked": [
+            "chinese-tokens",
+            "backup",
+            "offline-models",
+            "api-legacy",
+            "travel-current",
+            "payment-current",
+            "api-current",
+            "expenses",
+            "expenses-en"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 418.258,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q05",
+          "group": "chinese",
+          "query": "申请费用报销要附上什么凭证？",
+          "expected": [
+            "expenses"
+          ],
+          "ranked": [
+            "expenses",
+            "expenses-en",
+            "payment-current",
+            "travel-current",
+            "chinese-tokens",
+            "offline-models",
+            "api-legacy",
+            "backup",
+            "api-current"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 909.959,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q06",
+          "group": "chinese",
+          "query": "恢复数据时如何避免覆盖正在使用的数据库？",
+          "expected": [
+            "backup"
+          ],
+          "ranked": [
+            "backup",
+            "offline-models",
+            "expenses-en",
+            "payment-current",
+            "travel-current",
+            "expenses",
+            "api-current",
+            "chinese-tokens",
+            "api-legacy"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 662.847,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q07",
+          "group": "english",
+          "query": "How many days after payment may employees submit reimbursement receipts?",
+          "expected": [
+            "expenses-en",
+            "expenses"
+          ],
+          "ranked": [
+            "expenses-en",
+            "expenses",
+            "payment-current",
+            "chinese-tokens",
+            "api-legacy",
+            "offline-models",
+            "api-current",
+            "backup",
+            "travel-current"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 445.772,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q08",
+          "group": "english",
+          "query": "How should local retrieval models be checked without an internet connection?",
+          "expected": [
+            "offline-models"
+          ],
+          "ranked": [],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "insufficient",
+          "elapsed_ms": 664.79,
+          "recall_at_5": 0.0,
+          "mrr_at_10": 0.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q09",
+          "group": "english",
+          "query": "How do I restore a database safely without overwriting the live file?",
+          "expected": [
+            "backup"
+          ],
+          "ranked": [
+            "backup",
+            "offline-models",
+            "expenses-en",
+            "api-legacy",
+            "chinese-tokens",
+            "travel-current",
+            "payment-current",
+            "expenses",
+            "api-current"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 522.187,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q10",
+          "group": "english",
+          "query": "Which API should a new version 2 project call?",
+          "expected": [
+            "api-current"
+          ],
+          "ranked": [
+            "api-current",
+            "api-legacy",
+            "offline-models",
+            "payment-current",
+            "chinese-tokens",
+            "travel-current",
+            "expenses",
+            "backup",
+            "expenses-en"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 381.943,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q11",
+          "group": "updates",
+          "query": "还没升级的 v1 旧项目应该继续调用哪个 API？",
+          "expected": [
+            "api-legacy"
+          ],
+          "ranked": [
+            "api-legacy",
+            "api-current",
+            "offline-models",
+            "backup",
+            "travel-current",
+            "expenses-en",
+            "chinese-tokens",
+            "expenses",
+            "payment-current"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 731.243,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q12",
+          "group": "updates",
+          "query": "现在差旅每天餐饮补助额度是多少？",
+          "expected": [
+            "travel-current"
+          ],
+          "ranked": [
+            "travel-current",
+            "payment-current",
+            "chinese-tokens",
+            "expenses",
+            "expenses-en",
+            "offline-models",
+            "backup",
+            "api-current",
+            "api-legacy"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 534.204,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q13",
+          "group": "updates",
+          "query": "旧口头付款批准流程被撤销后，现在需要怎样审批？",
+          "expected": [
+            "payment-current"
+          ],
+          "ranked": [
+            "payment-current",
+            "expenses",
+            "expenses-en",
+            "travel-current",
+            "api-legacy",
+            "api-current",
+            "backup",
+            "chinese-tokens",
+            "offline-models"
+          ],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "pass",
+          "elapsed_ms": 781.915,
+          "recall_at_5": 1.0,
+          "mrr_at_10": 1.0,
+          "no_answer_correct": null,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q14",
+          "group": "unanswerable",
+          "query": "如何烘焙巧克力蛋糕，需要多少面粉？",
+          "expected": [],
+          "ranked": [],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "insufficient",
+          "elapsed_ms": 528.208,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": true,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q15",
+          "group": "unanswerable",
+          "query": "提交报销申请的网站具体 URL 是什么？",
+          "expected": [],
+          "ranked": [],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "insufficient",
+          "elapsed_ms": 391.732,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": true,
+          "lifecycle_violations": [],
+          "error_type": null
+        },
+        {
+          "id": "q16",
+          "group": "unanswerable",
+          "query": "API v3 每秒的具体限流数字是多少？",
+          "expected": [],
+          "ranked": [],
+          "status": "ok",
+          "backend": "elasticsearch",
+          "mode": "hybrid",
+          "grade": "insufficient",
+          "elapsed_ms": 394.293,
+          "recall_at_5": null,
+          "mrr_at_10": null,
+          "no_answer_correct": true,
+          "lifecycle_violations": [],
+          "error_type": null
+        }
+      ],
+      "metrics": {
+        "total_cases": 16,
+        "positive_cases": 13,
+        "scored_positive_cases": 13,
+        "mean_recall_at_5": 0.9230769230769231,
+        "mean_mrr_at_10": 0.9230769230769231,
+        "unanswerable_cases": 3,
+        "graded_unanswerable_cases": 3,
+        "unanswerable_false_passes": 0,
+        "unanswerable_correct": 3,
+        "failed_or_degraded_cases": 0,
+        "lifecycle_violations": 0,
+        "mean_query_ms": 561.4600624999999
+      },
+      "group_metrics": {
+        "chinese": {
+          "total_cases": 6,
+          "positive_cases": 6,
+          "scored_positive_cases": 6,
+          "mean_recall_at_5": 1.0,
+          "mean_mrr_at_10": 1.0,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 601.179
+        },
+        "english": {
+          "total_cases": 4,
+          "positive_cases": 4,
+          "scored_positive_cases": 4,
+          "mean_recall_at_5": 0.75,
+          "mean_mrr_at_10": 0.75,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 503.673
+        },
+        "unanswerable": {
+          "total_cases": 3,
+          "positive_cases": 0,
+          "scored_positive_cases": 0,
+          "mean_recall_at_5": null,
+          "mean_mrr_at_10": null,
+          "unanswerable_cases": 3,
+          "graded_unanswerable_cases": 3,
+          "unanswerable_false_passes": 0,
+          "unanswerable_correct": 3,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 438.07766666666663
+        },
+        "updates": {
+          "total_cases": 3,
+          "positive_cases": 3,
+          "scored_positive_cases": 3,
+          "mean_recall_at_5": 1.0,
+          "mean_mrr_at_10": 1.0,
+          "unanswerable_cases": 0,
+          "graded_unanswerable_cases": 0,
+          "unanswerable_false_passes": null,
+          "unanswerable_correct": null,
+          "failed_or_degraded_cases": 0,
+          "lifecycle_violations": 0,
+          "mean_query_ms": 682.4540000000001
+        }
+      },
+      "error_type": null
+    }
+  ],
+  "limitations": [
+    "Public synthetic baseline with draft labels; not a held-out benchmark.",
+    "No generated answers, automatic query rewriting or model-token accounting.",
+    "SQLite has no relevance grader: unavailable is not scored as correct abstention.",
+    "One unscored warmup per backend; setup includes fixture embedding/indexing.",
+    "Small corpus and Chinese-oriented models; no claim of general multilingual quality."
+  ]
+}

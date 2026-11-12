@@ -11,6 +11,8 @@ offline-first 的官方样板项目，本项目 build-logic 的约定插件设�
 
 | 场景 | 参照文件 | 要点 |
 |---|---|---|
+| 隔离检索质量基线 | `platform/src/govplatform/evaluation/`、`platform/evals/retrieval-v1.json`；`platform/tests/test_evaluation.py` | 独立临时数据库和评测索引，草案标签可追溯；失败/降级及无答案未评分分开；CLI 进程使用，报告不能替代人工质量验收 |
+| 来源关系与有界图查询 | `platform/src/govplatform/graph/`、`review/graph.py`、`mcp_server/graph_tools.py`；`platform/tests/test_graph_*.py` | SQLite 来源元数据和关系真源；摘要绑定、人工审核/撤销；依赖反向查询，历史路径标风险，替代候选不传播依赖；T-028 自动检查与人工审查状态见任务记录 |
 | 平台任务接续与证据门禁 | `platform/src/govplatform/delivery/context.py`、`submission.py`、`report.py`；底层 `harness/evidence_guard.py`；测试 `platform/tests/test_execution_loop.py` | T-025 会话内 prepare/verify/submit/status；准入不可覆盖、各入口统一校验、人工批准保留；正式部署与人工审查状态见任务记录 |
 | 新建 feature 模块 | `feature/home/` | 模块结构、`studycompose.android.feature` 约定插件已经带好 domain/core/Hilt 依赖 |
 | 页面三态 | `core/ui/src/main/kotlin/com/study/cc/core/ui/state/` | `LoadingState`/`EmptyState`/`ErrorState` 用法 |

@@ -18,10 +18,12 @@ from govplatform.knowledge.models import (
 )
 from govplatform.knowledge.query_service import KnowledgePage, get_knowledge, list_knowledge
 from govplatform.knowledge.service import ProposeResponse
+from govplatform.mcp_server.graph_tools import register_graph_tools
 from govplatform.search import service as search_service
 from govplatform.search.service import SearchResponse
 
 mcp = MCPServer("govplatform")
+register_graph_tools(mcp)
 
 
 @mcp.tool(name="knowledge.list")
@@ -47,9 +49,19 @@ async def knowledge_search(
     caller: Principal,
     knowledge_type: KnowledgeType | None = None,
     limit: int = 10,
+    attempt: int = 0,
 ) -> SearchResponse:
+    """检索生效知识。relevance_grade=pass 仅表示候选相关，不代表足以回答。
+    answer_assessment=not_assessed 表示平台未评估答案充分性，宿主须按原问题逐项核对：
+    所需信息是否齐全，对象/版本/时间/适用范围是否一致，来源是否有效或存在冲突，
+    关键结论是否有原文依据。片段不足时用 knowledge.get 读全文并重新核对状态与版本。
+    部分有据则只答有据部分并说明缺口；证据不足或冲突未解决时明确说明，不补造网址或数字。
+    relevance_grade=retry 时保留原问约束改写 query，递增 attempt，最多重试两轮；
+    insufficient 时说明未检索到足够依据，unavailable 时说明相关性判定不可用或降级。
+    此工具不调用云端 LLM，也不替宿主执行语义核对。
+    """
     return search_service.search(
-        query=query, caller=caller, knowledge_type=knowledge_type, limit=limit
+        query=query, caller=caller, knowledge_type=knowledge_type, limit=limit, attempt=attempt
     )
 
 

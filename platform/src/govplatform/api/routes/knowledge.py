@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from govplatform.identity.models import Principal, PrincipalNotAllowedError
 from govplatform.knowledge import service as knowledge_service
@@ -38,6 +38,7 @@ class SearchRequest(BaseModel):
     caller: Principal
     knowledge_type: KnowledgeType | None = None
     limit: int = 10
+    attempt: int = Field(default=0, ge=0, le=2)
 
 
 class ApproveRequest(BaseModel):
@@ -80,6 +81,7 @@ def search_knowledge(request: SearchRequest) -> SearchResponse:
             caller=request.caller,
             knowledge_type=request.knowledge_type,
             limit=request.limit,
+            attempt=request.attempt,
         )
     except PrincipalNotAllowedError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc

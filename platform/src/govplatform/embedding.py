@@ -5,14 +5,14 @@ from functools import lru_cache
 import numpy as np
 from fastembed import TextEmbedding
 
-# 向量记录要跟这个名字一起存，换模型之后旧向量和新查询向量维度/语义空间
-# 都可能对不上，不能直接比余弦相似度——见 knowledge/store.py 里怎么用它。
-MODEL_NAME = "BAAI/bge-small-zh-v1.5"
+from govplatform import model_cache
+
+MODEL_NAME = model_cache.MODEL_NAME
 
 
 @lru_cache(maxsize=1)
 def _get_model() -> TextEmbedding:
-    return TextEmbedding(model_name=MODEL_NAME)
+    return model_cache.load_model(allow_download=True)
 
 
 def embed(text: str) -> bytes:

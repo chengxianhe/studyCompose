@@ -81,3 +81,32 @@ CREATE TABLE IF NOT EXISTS audit_events (
   request_json      TEXT NOT NULL,
   result_summary    TEXT NOT NULL
 );
+
+-- T-028 additive schema: existing databases retain all knowledge and governance records.
+CREATE TABLE IF NOT EXISTS graph_sources (
+  source_id TEXT PRIMARY KEY,
+  locator TEXT NOT NULL,
+  dedup_key TEXT NOT NULL,
+  payload TEXT NOT NULL,
+  UNIQUE(locator, dedup_key)
+);
+
+CREATE TABLE IF NOT EXISTS graph_relations (
+  relation_id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL CHECK(kind IN ('derived_from','depends_on','supersedes')),
+  subject_id TEXT NOT NULL REFERENCES knowledge_objects(knowledge_id),
+  target_knowledge_id TEXT REFERENCES knowledge_objects(knowledge_id),
+  target_source_id TEXT REFERENCES graph_sources(source_id),
+  evidence_source_id TEXT NOT NULL REFERENCES graph_sources(source_id),
+  status TEXT NOT NULL CHECK(status IN ('in_review','active','revoked')),
+  payload TEXT NOT NULL,
+  CHECK((kind='derived_from' AND target_source_id IS NOT NULL AND target_knowledge_id IS NULL)
+    OR (kind!='derived_from' AND target_knowledge_id IS NOT NULL AND target_source_id IS NULL)),
+  CHECK(subject_id != COALESCE(target_knowledge_id,''))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_graph_relation_live
+  ON graph_relations(kind, subject_id, COALESCE(target_knowledge_id,''), COALESCE(target_source_id,''))
+  WHERE status IN ('in_review','active');
+CREATE INDEX IF NOT EXISTS idx_graph_subject ON graph_relations(subject_id,status,relation_id);
+CREATE INDEX IF NOT EXISTS idx_graph_target ON graph_relations(target_knowledge_id,kind,status,relation_id);
+CREATE INDEX IF NOT EXISTS idx_graph_source ON graph_relations(target_source_id,kind,status,relation_id);

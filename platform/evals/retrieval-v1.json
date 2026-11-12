@@ -1,0 +1,35 @@
+{
+  "version": "retrieval-v1",
+  "label_status": "draft",
+  "documents": [
+    {"id":"api-current","title":"接口迁移指引：新项目 v2","body":"新项目必须调用 API B。API A 不适用于新项目。迁移时先核对调用参数和响应字段，再执行回归测试。本指引只适用于 v2 新项目。"},
+    {"id":"api-legacy","title":"接口兼容指引：旧项目 v1","body":"仍运行 v1 的旧项目继续使用 API A。只有完成版本升级的项目才迁移到 API B。旧版兼容指引仍然有效，不能只根据登记时间选择接口。"},
+    {"id":"offline-models","title":"本地知识检索模型离线校验","body":"先预下载 embedding 向量模型和 reranker 重排模型，固定修订版本及文件 SHA-256。断开网络后重新验证文件摘要并执行检索。缺少或损坏文件时报告失败，不把降级当作完整链路可用。"},
+    {"id":"chinese-tokens","title":"中文 BM25 短语检索","body":"连续中文按相邻双字切分，英文和数字标识保留为词。这样短语可以匹配长句中的片段。所有文档均无词元时不构建 BM25，避免空语料错误。"},
+    {"id":"expenses","title":"报销材料清单","body":"费用报销需要提交发票、付款凭证和经理审批记录。报销人在付款后 30 天内提交材料。此清单没有规定报销网站地址或登录方式。"},
+    {"id":"backup","title":"数据库备份与安全恢复","body":"使用 SQLite 一致性快照备份，记录文件摘要和表行数。恢复时验证完整性并写入全新文件，拒绝覆盖在线数据库或符号链接。核对恢复结果后再显式切换服务使用的数据库。"},
+    {"id":"expenses-en","title":"Reimbursement deadline policy","body":"Employees must submit reimbursement receipts within thirty calendar days after payment. Attach the invoice, proof of payment and manager approval. This is a synthetic English policy for the retrieval baseline."},
+    {"id":"travel-current","title":"差旅额度：新版","body":"当前差旅餐饮补助上限为每天 120 元。新版已经替代每天 80 元的旧额度，申请时按新版额度核算。此例为合成测试政策。"},
+    {"id":"travel-expired","title":"差旅额度：过期旧版","body":"旧版差旅餐饮补助上限为每天 80 元。此旧版已过期，不可作为当前报销依据。","state":"expired"},
+    {"id":"payment-current","title":"当前付款审批清单","body":"付款前需要预算负责人和财务负责人共同审批。当前流程不接受口头批准，必须保留审批记录。此清单替代已经撤销的旧付款清单。"},
+    {"id":"payment-deprecated","title":"已撤销的付款清单","body":"旧流程只需要口头批准即可付款。此规则已撤销，不得用于当前付款审批。","state":"deprecated"}
+  ],
+  "cases": [
+    {"id":"q01","group":"chinese","query":"新项目 v2 应调用哪个接口？","relevant":["api-current"],"rationale":"限定新项目，旧项目指引不是本问的有效答案。"},
+    {"id":"q02","group":"chinese","query":"付款前要谁批准，能口头同意吗？","relevant":["payment-current"],"rationale":"当前审批人及书面记录要求在新清单中。"},
+    {"id":"q03","group":"chinese","query":"断网前后怎样检查知识检索模型是否完整？","relevant":["offline-models"],"rationale":"需要预下载、固定修订、核验摘要并断网检索。"},
+    {"id":"q04","group":"chinese","query":"短语怎么匹配一段很长的中文，BM25 应该怎样分词？","relevant":["chinese-tokens"],"rationale":"相邻双字分词用于中文短语匹配。"},
+    {"id":"q05","group":"chinese","query":"申请费用报销要附上什么凭证？","relevant":["expenses"],"rationale":"中文清单列出发票、付款凭证、审批记录。"},
+    {"id":"q06","group":"chinese","query":"恢复数据时如何避免覆盖正在使用的数据库？","relevant":["backup"],"rationale":"恢复到全新文件并验证完整性，拒绝覆盖在线库。"},
+    {"id":"q07","group":"english","query":"How many days after payment may employees submit reimbursement receipts?","relevant":["expenses-en","expenses"],"rationale":"英文政策和中文材料清单都明确 30 天期限。"},
+    {"id":"q08","group":"english","query":"How should local retrieval models be checked without an internet connection?","relevant":["offline-models"],"rationale":"英文问法对应中文离线模型校验文档。"},
+    {"id":"q09","group":"english","query":"How do I restore a database safely without overwriting the live file?","relevant":["backup"],"rationale":"英文问法对应中文备份恢复约束。"},
+    {"id":"q10","group":"english","query":"Which API should a new version 2 project call?","relevant":["api-current"],"rationale":"新版本限定使旧项目接口指引不适用。"},
+    {"id":"q11","group":"updates","query":"还没升级的 v1 旧项目应该继续调用哪个 API？","relevant":["api-legacy"],"rationale":"旧版指引仍有效，不能因为存在新版就删去。"},
+    {"id":"q12","group":"updates","query":"现在差旅每天餐饮补助额度是多少？","relevant":["travel-current"],"rationale":"旧额度文档已过期，不能作为有效检索结果。"},
+    {"id":"q13","group":"updates","query":"旧口头付款批准流程被撤销后，现在需要怎样审批？","relevant":["payment-current"],"rationale":"废弃清单必须过滤，同时召回当前清单。"},
+    {"id":"q14","group":"unanswerable","query":"如何烘焙巧克力蛋糕，需要多少面粉？","relevant":[],"rationale":"合成资料没有烘焙知识，主题无关。"},
+    {"id":"q15","group":"unanswerable","query":"提交报销申请的网站具体 URL 是什么？","relevant":[],"rationale":"材料清单与报销相关，但未提供网站 URL；测相关性不等于答案充分性。"},
+    {"id":"q16","group":"unanswerable","query":"API v3 每秒的具体限流数字是多少？","relevant":[],"rationale":"语料没有 v3 或限流数值；不能用 v1/v2 指引代替答案。"}
+  ]
+}

@@ -13,6 +13,7 @@ from pathlib import Path
 from govplatform.config import db_path
 
 TABLES = ("knowledge_objects", "contracts", "harness_runs", "waivers", "audit_events")
+GRAPH_TABLES = ("graph_sources", "graph_relations")
 
 
 def inspect_database(path: Path) -> dict[str, int]:
@@ -21,9 +22,15 @@ def inspect_database(path: Path) -> dict[str, int]:
             raise ValueError("SQLite integrity check failed")
         if conn.execute("PRAGMA foreign_key_check").fetchall():
             raise ValueError("SQLite foreign key check failed")
+        existing = {
+            row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        graph_tables = tuple(table for table in GRAPH_TABLES if table in existing)
+        if graph_tables and len(graph_tables) != len(GRAPH_TABLES):
+            raise ValueError("incomplete graph schema")
         return {
             table: int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
-            for table in TABLES
+            for table in (*TABLES, *graph_tables)
         }
 
 

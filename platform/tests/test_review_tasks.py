@@ -139,5 +139,11 @@ def test_repeated_start_form_creates_only_one_run(contract: Contract, owner_huma
         assert client.post(action, data=fields, follow_redirects=False).status_code == 409
         with get_connection() as conn:
             assert conn.execute("SELECT COUNT(*) FROM harness_runs").fetchone()[0] == 1
-        # 刷新新表单也不能误开第二条活动运行。
-        assert submit(client, action) == 409
+            run_id = conn.execute("SELECT run_id FROM harness_runs").fetchone()[0]
+        # 刷新后清楚展示已启动，不再提供会被后端拒绝的重复启动按钮。
+        page = client.get("/tasks").text
+        assert f'action="{action}"' not in page
+        assert 'role="status">已启动 · 正在开发' in page
+        run = harness.get(run_id, caller=owner_human)
+        assert run is not None
+        assert f'href="#run-{run.run_id}"' in page

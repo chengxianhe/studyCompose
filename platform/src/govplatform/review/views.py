@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import hashlib
 from html import escape
 
 from pydantic import BaseModel
 
+from govplatform.fingerprints import fingerprint as fingerprint
 from govplatform.review.tickets import FormTickets
-
-
-def fingerprint(obj: BaseModel) -> str:
-    return hashlib.sha256(obj.model_dump_json().encode()).hexdigest()
 
 
 def form(
@@ -42,7 +38,8 @@ pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f5f8;padding:16px
 button{{padding:10px 18px;background:#175bb0;color:white;border:0;border-radius:8px;cursor:pointer}}
 textarea{{display:block;width:95%;min-height:90px;margin:8px 0}} fieldset{{margin:16px 0}}
 small{{color:#556}} nav{{display:flex;gap:24px}} form{{margin-top:20px}}
-</style><nav><a href="/">知识审核</a><a href="/tasks">任务契约与验收</a></nav>
+</style><nav><a href="/">知识审核</a><a href="/graph">来源与关系</a>
+<a href="/tasks">任务契约与验收</a></nav>
 <h1>{escape(title)}</h1>{content}</html>"""
 
 

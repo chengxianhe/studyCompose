@@ -10,6 +10,8 @@ dependencies = [
   "mcp>=2.0",
   "rank-bm25>=0.2.2",
   "fastembed>=0.8.0",
+  "huggingface-hub>=1.32.0,<2",
+  "elasticsearch>=9.5.0,<9.6",
   "numpy>=1.26",
 ]
 
