@@ -28,16 +28,21 @@ RAW（如 CR3/RAF）缩略图、完整权限旅程、返回与未知桶等场景
 `platform/` 是独立的本机 Python 原型，不参与 Gradle 构建，Android 应用运行不依赖它。
 
 - **知识治理**：提案、目录与全文查看、人工审核/废弃、BM25 与本地向量混合检索，以及备份恢复。
+- **本地检索与来源图谱**：固定模型修订与摘要、结构分块/父子关联、ES 混合召回和本地重排；来源、依赖/替代关系及影响查询。
+- **宿主主动补证**：内部资料不足时继续选择澄清、外查或授权检查，保留原问、来源和停止原因；工具指引与记录校验不等于独立语义裁判或后台 Agent。
 - **任务契约**：结构化验收标准和测试用例、版本校验、人工冻结与运行启动。
 - **执行与证据**：会话内的 `prepare / verify / submit / status` 命令连接源码快照、统一检查和验收记录。
 - **人工入口**：本机网页提供知识审核、任务确认、人工验收与最终交付；Agent 不代替用户批准。
 - **MCP 工具**：`knowledge.list/get/search/propose`、`contract.create/get/update`、
   `harness.record_entry_gate/record_acceptance/get`，配置见 [.mcp.json](.mcp.json)。
+  来源与图谱另提供 `graph.source_register/propose/get/list/explain/impact`。
 
 [T-025](docs/tasks/t-025.md) 的真实会话闭环已于 2026-11-06 经用户确认交付；
 T-023、T-014 的待审项仍分别保留。平台没有关闭会话后持续开发的后台调度器；
 身份声明和证据校验面向本机受信任进程，不提供防伪身份保证。
 详见 [平台 README](platform/README.md)、[知识操作](docs/knowledge/README.md) 和 [工作流](docs/workflow.md)。
+通用能力的目标、分层及尚未实现的部分见 [架构 v0.2](docs/knowledge/architecture-v0.2.md)
+和 [能力路线图](docs/knowledge/capability-roadmap.md)。微信与小看板属于应用适配，核心不依赖它们。
 
 ## 快速开始
 
@@ -81,6 +86,9 @@ bash scripts/verify.sh all       # 两端完整检查，含工作流脚本测试
 
 2026-11-09 的提交版本 `d4f5f5b` 已通过 `all`：工作流 9 个测试、Android 完整门禁、
 平台 120 个测试通过。这是该版本的自动检查记录，不代替真机、性能或人工验收。
+2026-11-12 的 T-031 候选快照通过平台完整门禁：192 项测试，无跳过，含真实本机 ES 与 stdio MCP；
+新增 24 项补证记录测试，六类宿主案例中四类为真实工具观察、两类为明确回放。
+T-026～T-031 的实现、未验证项与人工状态见各任务接续，不能用测试通过替代人工交付。
 CI 使用相同入口；远端合并阻断仍需分支规则配合，Jacoco/APK 体积为报告项。
 
 ## 工程结构

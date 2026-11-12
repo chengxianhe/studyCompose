@@ -32,6 +32,10 @@ to run the Android app.
 
 - **Knowledge governance:** proposals, catalog and full-text access, human approval/deprecation,
   BM25 and local vector search, plus backup and restore.
+- **Local retrieval and provenance:** pinned model revisions/hashes, parent-child chunks, ES hybrid
+  retrieval, local reranking, and reviewed source/dependency/replacement relations with impact queries.
+- **Host evidence completion:** when internal evidence is incomplete, the host can clarify, research
+  public sources or perform authorized checks. Trace validation is not a semantic judge or background agent.
 - **Task contracts:** structured acceptance criteria and test cases, version checks, human contract
   freezing and run initiation.
 - **Execution evidence:** session commands `prepare / verify / submit / status` connect source snapshots,
@@ -40,6 +44,7 @@ to run the Android app.
   and final delivery. Agents do not approve on the user's behalf.
 - **MCP tools:** `knowledge.list/get/search/propose`, `contract.create/get/update` and
   `harness.record_entry_gate/record_acceptance/get`; see [.mcp.json](.mcp.json).
+  Provenance tools include `graph.source_register/propose/get/list/explain/impact`.
 
 The real [T-025](docs/tasks/t-025.md) session workflow received user delivery approval on November 6, 2026.
 T-023 and T-014 retain their own outstanding review items. The platform has no background scheduler
@@ -47,6 +52,9 @@ that continues development after a session closes. Identity declarations and evi
 trusted local processes; they do not provide protection against forged identities.
 See the [platform README](platform/README.md), [knowledge guide](docs/knowledge/README.md) and
 [workflow guide](docs/workflow.md). Detailed project documents are in Chinese.
+See [architecture v0.2](docs/knowledge/architecture-v0.2.md) and the
+[capability roadmap](docs/knowledge/capability-roadmap.md) for goals, boundaries and gaps.
+WeChat and desktop cards are application adapters, not core dependencies.
 
 ## Getting started
 
@@ -95,6 +103,11 @@ Commit `d4f5f5b` passed `all` on November 9, 2026: 9 workflow tests, the complet
 120 platform tests. This records automated checks for that version; it does not replace device,
 performance or human acceptance. CI uses the same entry point. Remote merge blocking still requires
 branch rules; Jacoco and APK-size reporting are advisory.
+
+The November 12 T-031 candidate passed all 192 platform tests without skips, including real local
+ES and stdio MCP integration. It adds 24 evidence-trace tests; four of six host cases contain real
+tool observations and two are explicitly marked replay. Task records retain human review and
+unverified scopes; these checks do not imply final delivery approval.
 
 ## Repository structure
 
