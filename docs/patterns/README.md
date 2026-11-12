@@ -11,6 +11,7 @@ offline-first 的官方样板项目，本项目 build-logic 的约定插件设�
 
 | 场景 | 参照文件 | 要点 |
 |---|---|---|
+| 宿主补证记录与引用校验 | `platform/src/govplatform/evaluation/evidence_trace.py`、`platform/evals/evidence-completion-v1.json`；`platform/tests/test_evidence_trace.py` | 记录原问、观察、原文、版本与停止状态；来源版本和宿主判断的适用版本分开；区分真实走查/固定回放，不把结构校验当语义或真实性裁判；T-031 待完整门禁/人工审查 |
 | 隔离检索质量基线 | `platform/src/govplatform/evaluation/`、`platform/evals/retrieval-v1.json`；`platform/tests/test_evaluation.py` | 独立临时数据库和评测索引，草案标签可追溯；失败/降级及无答案未评分分开；CLI 进程使用，报告不能替代人工质量验收 |
 | 来源关系与有界图查询 | `platform/src/govplatform/graph/`、`review/graph.py`、`mcp_server/graph_tools.py`；`platform/tests/test_graph_*.py` | SQLite 来源元数据和关系真源；摘要绑定、人工审核/撤销；依赖反向查询，历史路径标风险，替代候选不传播依赖；T-028 自动检查与人工审查状态见任务记录 |
 | 平台任务接续与证据门禁 | `platform/src/govplatform/delivery/context.py`、`submission.py`、`report.py`；底层 `harness/evidence_guard.py`；测试 `platform/tests/test_execution_loop.py` | T-025 会话内 prepare/verify/submit/status；准入不可覆盖、各入口统一校验、人工批准保留；正式部署与人工审查状态见任务记录 |

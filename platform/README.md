@@ -236,6 +236,18 @@ ES_JAVA_OPTS="-Xms512m -Xmx512m" platform/.data/es/elasticsearch-9.5.6/bin/elast
 API v1/v2 的调用指引也不能回答 API v3 的具体限流数字。
 以上语义结论由宿主另行记录，不写成检索平台的已评估状态。
 工具说明和字段不能强制所有宿主遵守核对步骤；测试协议返回也不能证明语义判断正确。
+
+内部证据不足时，宿主继续识别缺口：缺对象才澄清，缺可查事实则在权限/预算内外查并读一手原文，
+需要环境证明则执行已授权检查。即使 relevance pass，信息不全也不能直接结束任务。
+补证后复核对象、版本、时间与冲突；无可靠资料、工具不可用或预算用尽时说明实际查证过程和停止原因。
+内部改写仍最多两轮；外查共享任务预算，不发送私有原文或凭据，不把临时证据自动转成 active 知识。
+
+新增 `govplatform.evaluation.evidence_trace.EvidenceTrace` 用于记录原问、工具观察、来源引文、
+逐项要求和停止状态。它只做确定性结构/引用检查，不联网、不写知识、不调用模型；
+`answer_assessment=host_reported` 属于这份宿主记录，search 响应仍为 `not_assessed`。
+`host_observed` 与 `fixture_replay` 区分实际宿主走查与固定回放；工具观察仍需对照原始日志，
+记录自报的真实性和语义是否充分不能由 schema 保证。
+六类草案案例见 `evals/evidence-completion-v1.json`，实际范围和人工结论见 [T-031](../docs/tasks/t-031.md)。
 该循环由当前会话完成，平台本身不调用云端 LLM API，也不提供无人值守的自动生成服务。
 
 ## 目录结构

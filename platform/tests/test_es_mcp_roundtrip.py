@@ -55,6 +55,10 @@ async def test_stdio_search_evidence_rewrites_and_limit(
             assert "pass 仅表示候选相关，不代表足以回答" in description
             assert "answer_assessment=not_assessed" in description
             assert "保留原问约束" in description
+            assert "主动补证" in description
+            assert "不是任务终点" in description
+            assert "不自动入库" in description
+            assert "停止原因" in description
 
             # Fixed reformulations test the wire contract, not autonomous LLM rewriting.
             for attempt, query in enumerate(
